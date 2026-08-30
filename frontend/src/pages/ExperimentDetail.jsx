@@ -110,7 +110,7 @@ export default function ExperimentDetail() {
           <ViralityScore score={c.score} />
         </div>
         <DeepAnalysis headline={c.angle.headline} body={c.angle.body} audience={c.audience_snapshot}
-          goal={c.goal} platform={c.angle.channel} heuristic={c.score} />
+          goal={c.goal} platform={c.angle.channel} heuristic={c.score} campaignId={c.id} initial={c.deep_analysis} />
       </motion.section>
 
       {/* STAGE 2 — LAUNCH */}

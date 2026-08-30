@@ -278,6 +278,24 @@ async def resynth_outcome(campaign_id: str, current=Depends(get_current_user)):
     return await db.campaigns.find_one({"id": campaign_id}, {"_id": 0})
 
 
+@api.post("/campaigns/{campaign_id}/deep-analysis")
+async def campaign_deep_analysis(campaign_id: str, current=Depends(get_current_user)):
+    doc = await db.campaigns.find_one({"id": campaign_id, "user_id": current["id"]}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    heuristic = doc.get("score")
+    angle = doc.get("angle")
+    if not heuristic or not angle:
+        raise HTTPException(status_code=400, detail="Campaign has no scored angle")
+    ai = await llm_service.deep_analysis(
+        angle["headline"], angle["body"], doc.get("audience_snapshot"),
+        doc.get("goal", "awareness"), angle.get("channel"), heuristic,
+    )
+    payload = {"heuristic": heuristic, "ai": ai, "comparison": _build_comparison(heuristic, ai)}
+    await db.campaigns.update_one({"id": campaign_id}, {"$set": {"deep_analysis": payload}})
+    return payload
+
+
 @api.delete("/campaigns/{campaign_id}")
 async def delete_campaign(campaign_id: str, current=Depends(get_current_user)):
     res = await db.campaigns.delete_one({"id": campaign_id, "user_id": current["id"]})

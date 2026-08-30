@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 /** Count-up animated number (respects prefers-reduced-motion). */
-export default function CountUp({ value = 0, duration = 900, decimals = 0, className = "" }) {
+export default function CountUp({ value = 0, duration = 900, decimals = 0, className = "", style }) {
   const [display, setDisplay] = useState(0);
   const raf = useRef();
   const start = useRef();
@@ -25,5 +25,5 @@ export default function CountUp({ value = 0, duration = 900, decimals = 0, class
   const formatted = Number(display).toLocaleString(undefined, {
     maximumFractionDigits: decimals, minimumFractionDigits: decimals,
   });
-  return <span className={className}>{formatted}</span>;
+  return <span className={className} style={style}>{formatted}</span>;
 }

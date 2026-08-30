@@ -1,0 +1,56 @@
+{
+  "summary": "Iteration 4 focused testing of (A) expandable Virality Score factor explanations and (B) Deep Analysis persistence to the public report, plus full regression smoke. Backend: 66/66 pytest tests pass (including 5 new persistence tests in test_deep_analysis_persist.py covering auth 401/403, 404 bad id, run+persist, GET campaign, PUBLIC /api/report inclusion, and absence for campaigns that never ran DA). Frontend: all 5 factor rows toggle correctly (aria-expanded flips, reasons appear/disappear, chevron rotates, score/bar/weight% always visible, weak-factor warning icon exactly on score<55), compact bars on dashboard/experiments list unaffected, persisted DA renders immediately with Re-run (no Run button), run+persist shows 'Deep Analysis saved to report' toast and survives reload, public report renders read-only report-deep-analysis with Heuristic vs AI/agreement/difference, and a campaign with no DA shows no section. Full wizard regression (product->audience->goal->platforms->generate 9 angles->select angle->expand factors->deep analysis->angle rewrite->run launch->real metrics->resynth->learning->share report) passed end-to-end with ZERO console errors. Theme light/dark persists across refresh (ll_theme).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/campaigns/{id}/deep-analysis", "issue": "Uses direct key access doc[\"score\"] / doc[\"angle\"] — a campaign document missing either key would raise KeyError -> 500 instead of a 4xx. Not reproducible with current data, defensive-only."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Report page header @ 390px (mobile)",
+        "issues": [
+          "Horizontal overflow of 18px: the header action row (div.flex.items-center.gap-2 containing copy-link-btn / download-report-btn / report-new-experiment) extends to x=408 on a 390px viewport, clipping the 'New experiment' button. Pre-existing (not introduced this iteration); Experiment Detail at 390px has 0 overflow. Suggest flex-wrap or shrinking the header actions at sm."
+        ]
+      },
+      {
+        "screen": "Deep Analysis card (all surfaces)",
+        "issues": [
+          "The 'AI 2nd Opinion' number is hardcoded to color var(--score-strong) regardless of value, so a weak AI score renders in the 'strong' green (observed AI 48 vs heuristic 73, and AI 30 vs heuristic 57). Inconsistent with the heuristic/factor colour bands used everywhere else — apply the existing scoreColor(res.ai.overall)."
+        ]
+      },
+      {
+        "screen": "ViralityScore factor toggle (mobile 390px)",
+        "issues": [
+          "Toggle button hit area is only ~20px tall, below the ~44px recommended touch target. Expansion still works; consider vertical padding on the button."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_deep_analysis_persist.py",
+    "/app/test_reports/pytest/persist_results.xml",
+    "/app/test_reports/pytest/all_results.xml"
+  ],
+  "action_items": [
+    "Report.jsx: fix 18px horizontal overflow of the header action button row at 390px (flex-wrap / smaller buttons).",
+    "DeepAnalysis.jsx: colour the AI 2nd Opinion number with scoreColor(res.ai.overall) instead of hardcoded var(--score-strong).",
+    "Optional: increase ViralityScore factor-toggle vertical padding for a >=44px mobile touch target."
+  ],
+  "critical_code_review_comments": [
+    "campaign_deep_analysis: consider doc.get(\"score\")/doc.get(\"angle\") with a 400/409 when the campaign has no stored angle/score, to avoid a KeyError 500.",
+    "DeepAnalysis.jsx readOnly && !res branch ('No Deep Analysis was saved') is currently unreachable because Report.jsx only mounts the component when c.deep_analysis is truthy — harmless but dead code.",
+    "ViralityScore.jsx: reasons list is unmounted when collapsed (AnimatePresence), so screen readers see aria-expanded=false with no hidden content — acceptable, but note the reasons are not in the DOM for search/print. Printing/downloading the report will omit collapsed explanations."
+  ],
+  "updated_files": ["/app/backend/tests/test_deep_analysis_persist.py"],
+  "success_rate": {"backend": "100% (66/66 pytest, incl. 5 new persistence tests)", "frontend": "100% of functional assertions (35+ checks) — 3 cosmetic/design nits only"},
+  "seed_data_creation": "Ran deep-analysis on demo campaigns 325ca166 (SmokeTest Co) and 5f515d39 (DevFlow). Created new campaign via wizard: 1c079f7b-35dd-42a3-a516-aa40a0219386 ('IterFour QA') with real metrics + resynth + persisted deep_analysis. Campaign 66912fc2 (QA DeepTest) intentionally left WITHOUT deep_analysis as the negative-case fixture for the report.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "demo@launchloop.ai / demo1234 (data-testid demo-login-btn); POST /api/auth/demo returns 'access_token'",
+  "context_for_next_testing_agent": "Both iteration-4 features fully verified. Negative fixture for report-without-deep-analysis: campaign 66912fc2-b484-442c-8c54-ee91ff7a9883 (do not run DA on it). Playwright note: after demo login the URL is exactly '/app', so wait_for_url('**/app/**') fails — use a lambda predicate. Report page section testids are report-score / report-deep-analysis / report-pvr (NOT virality-score). Theme buttons are theme-light / theme-dark / theme-system. Copy-link shows 'Copy failed — select the URL manually' in headless Chromium (clipboard permission), not an app bug. Only open items are the 3 cosmetic ones listed plus the pre-existing Analytics Recharts legend contrast issue from iteration 3.",
+  "rca_of_the_issue": "Report mobile overflow: the header keeps all three action buttons on one non-wrapping flex row; at 390px the label text is hidden (hidden sm:inline) but the three icon buttons plus the sidebar-less padding still total ~408px, pushing report-new-experiment past the viewport."
+}

@@ -29,6 +29,11 @@ Upgrade the existing LaunchLoop AI (V1) in place into a polished, demo-reliable 
 - Leaderboard (global 10 seeds + mine), Analytics (score trend, accuracy, pred-vs-real, factor radar, best angle/platform, top angles).
 - Shareable public report (/report/:id) with copy-link + download (print) + start-new-experiment.
 - Verified: 29/29 backend pytest, all frontend flows (iteration_1). Fixed toast overlap + button-nesting warning.
+- Deep Analysis (AI second opinion): `/api/deep-analysis` + `/api/campaigns/{id}/deep-analysis` (persisted); shown in Create Launch, Experiment Detail, and read-only on the shared Report. Graceful fallback if AI down.
+- Angle Rewrite: `/api/rewrite` improves a chosen weak factor, deterministic re-score, Before/After + downgrade warning.
+- Theme system: light/dark/system via next-themes + CSS tokens (exact palettes), persisted (`ll_theme`); ThemeToggle in header/sidebar.
+- Virality Score: expandable per-factor explanations, weak-factor warning icons, default-expanded on the Report.
+- Verified across testing iterations 2–4: 66/66 backend pytest, all frontend flows, zero console errors.
 
 ## Backlog
 - P1: Partial (PATCH) audience updates; Pydantic models for /score and /audiences/refresh.

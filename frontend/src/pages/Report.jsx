@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import ViralityScore from "@/components/ViralityScore";
+import DeepAnalysis from "@/components/DeepAnalysis";
 import PredictionReality from "@/components/PredictionReality";
 import { Sparkles, Link2, Download, Rocket, Brain, Dna } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -43,7 +44,7 @@ export default function Report() {
             <div className="h-8 w-8 rounded-lg bg-growth flex items-center justify-center"><Sparkles size={18} className="text-black" /></div>
             <span className="font-heading font-extrabold tracking-tight">LaunchLoop<span className="text-growth">.</span></span>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <ThemeToggle />
             <button onClick={copyLink} data-testid="copy-link-btn" className="flex items-center gap-2 border border-border px-3 py-2 rounded-lg text-sm hover:bg-surface transition-colors"><Link2 size={15} /> <span className="hidden sm:inline">Copy link</span></button>
             <button onClick={download} data-testid="download-report-btn" className="flex items-center gap-2 border border-border px-3 py-2 rounded-lg text-sm hover:bg-surface transition-colors"><Download size={15} /> <span className="hidden sm:inline">Download</span></button>
@@ -84,7 +85,10 @@ export default function Report() {
           <p className="text-sm text-muted-foreground mt-2">{c.angle.body}</p>
         </div>
 
-        <ViralityScore score={c.score} testid="report-score" />
+        <ViralityScore score={c.score} defaultOpen testid="report-score" />
+        {c.deep_analysis && (
+          <DeepAnalysis initial={c.deep_analysis} readOnly testid="report-deep-analysis" />
+        )}
         <PredictionReality prediction={c.prediction} outcome={c.outcome} delta={c.delta} source={c.outcome_source} testid="report-pvr" />
 
         {/* learning */}
