@@ -6,6 +6,7 @@ load_dotenv(ROOT_DIR / '.env')
 import os
 import logging
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
+from fastapi.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -44,6 +45,15 @@ async def _resolve_audience(user_id, audience_id, audience_inline):
 @api.get("/")
 async def root():
     return {"message": "LaunchLoop AI API", "status": "ok"}
+
+
+@api.get("/download/source")
+async def download_source():
+    zip_path = ROOT_DIR.parent / "LaunchLoop-AI-Final-Source.zip"
+    if not zip_path.exists():
+        raise HTTPException(status_code=404, detail="Source archive not found")
+    return FileResponse(str(zip_path), media_type="application/zip",
+                        filename="LaunchLoop-AI-Final-Source.zip")
 
 
 # ---------------- auth ----------------
