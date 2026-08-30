@@ -34,7 +34,7 @@ export default function Leaderboard() {
       </div>
 
       {loading ? (
-        <div className="space-y-2">{[...Array(6)].map((_, i) => <div key={i} className="h-16 rounded-lg border border-border bg-panel animate-pulse" />)}</div>
+        <div className="space-y-2">{["s1", "s2", "s3", "s4", "s5", "s6"].map((k) => <div key={k} className="h-16 rounded-lg border border-border bg-panel animate-pulse" />)}</div>
       ) : items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-panel p-12 text-center">
           <Trophy className="mx-auto text-foreground/30" size={30} />

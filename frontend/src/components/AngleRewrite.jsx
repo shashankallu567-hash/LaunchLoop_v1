@@ -79,7 +79,7 @@ export default function AngleRewrite({ angle, audience, goal, platform, onApply,
               : `${selFactor.label} is already strong at ${selFactor.score} — rewriting may not lift it`}
           </div>
           <ul className="space-y-1">
-            {selFactor.reasons.slice(0, 2).map((r, i) => <li key={i} className="text-xs text-muted-foreground flex gap-1.5"><span className="text-foreground/30 mt-px">›</span>{r}</li>)}
+            {selFactor.reasons.slice(0, 2).map((r, i) => <li key={`${i}-${r}`} className="text-xs text-muted-foreground flex gap-1.5"><span className="text-foreground/30 mt-px">›</span>{r}</li>)}
           </ul>
           {state !== "done" && (
             <button onClick={rewrite} disabled={state === "loading"} data-testid="rewrite-angle-btn"

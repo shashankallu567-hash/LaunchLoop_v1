@@ -92,7 +92,7 @@ export default function DeepAnalysis({ headline, body, audience, goal, platform,
             <div className="rounded-lg bg-surface border border-border p-3">
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5 flex items-center gap-1"><Sparkles size={11} /> AI-generated reasons{res.ai.source === "fallback" ? " (heuristic estimate — AI offline)" : ""}</div>
               <ul className="space-y-1">
-                {res.ai.reasons.map((r, i) => <li key={i} className="text-xs text-muted-foreground flex gap-1.5"><span className="text-growth mt-px">›</span>{r}</li>)}
+                {res.ai.reasons.map((r, i) => <li key={`${i}-${r}`} className="text-xs text-muted-foreground flex gap-1.5"><span className="text-growth mt-px">›</span>{r}</li>)}
               </ul>
             </div>
           </motion.div>

@@ -35,6 +35,8 @@ Upgrade the existing LaunchLoop AI (V1) in place into a polished, demo-reliable 
 - Virality Score: expandable per-factor explanations, weak-factor warning icons, default-expanded on the Report.
 - Verified across testing iterations 2–4: 66/66 backend pytest, all frontend flows, zero console errors.
 
+- Code-review safe fixes (2026-06, iteration 8): stable React keys (composite `${idx}-${reason}`) in DeepAnalysis/AngleRewrite, literal skeleton keys in Leaderboard; console.debug in VoiceButton catch blocks; test-file demo creds moved to `os.environ.get` with defaults. Deliberately SKIPPED (per user): httpOnly cookie migration, complexity refactors, hook-dependency edits — localStorage+JWT Bearer is intentional. "Undefined variable" and `is`/`is not None` findings confirmed FALSE POSITIVES (all branches assign; None/bool singleton checks are correct). Verified: 81/81 backend pytest, 100% frontend flows, zero console errors.
+
 ## Backlog
 - P1: Partial (PATCH) audience updates; Pydantic models for /score and /audiences/refresh.
 - P2: Report "Try LaunchLoop" CTA for anonymous viewers; model-judged "deep analysis" scoring mode.

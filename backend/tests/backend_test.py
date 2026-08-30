@@ -13,8 +13,8 @@ if not base_url:
 BASE_URL = base_url.rstrip("/")
 API = f"{BASE_URL}/api"
 
-DEMO_EMAIL = "demo@launchloop.ai"
-DEMO_PASSWORD = "demo1234"
+DEMO_EMAIL = os.environ.get("DEMO_EMAIL", "demo@launchloop.ai")
+DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "demo1234")
 
 FACTORS = ["hook", "emotion", "audience_fit", "shareability", "platform_fit"]
 

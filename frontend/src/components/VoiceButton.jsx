@@ -16,9 +16,9 @@ export default function VoiceButton({ value = "", onChange, testid = "voice-btn"
   const baseRef = useRef("");
   const supported = !!SpeechRecognition;
 
-  useEffect(() => () => { try { recRef.current?.stop(); } catch { /* noop */ } }, []);
+  useEffect(() => () => { try { recRef.current?.stop(); } catch (err) { console.debug("VoiceButton cleanup stop failed:", err); } }, []);
 
-  const stop = () => { try { recRef.current?.stop(); } catch { /* noop */ } setListening(false); };
+  const stop = () => { try { recRef.current?.stop(); } catch (err) { console.debug("VoiceButton stop failed:", err); } setListening(false); };
 
   const start = () => {
     const rec = new SpeechRecognition();

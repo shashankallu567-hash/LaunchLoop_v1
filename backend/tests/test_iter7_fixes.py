@@ -16,8 +16,8 @@ if not base_url:
     raise RuntimeError("REACT_APP_BACKEND_URL missing")
 BASE_URL = base_url.rstrip("/")
 
-DEMO_EMAIL = "demo@launchloop.ai"
-DEMO_PASSWORD = "demo1234"
+DEMO_EMAIL = os.environ.get("DEMO_EMAIL", "demo@launchloop.ai")
+DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "demo1234")
 
 
 @pytest.fixture(scope="module")

@@ -1,0 +1,37 @@
+{
+  "summary": "Iteration 8 REGRESSION pass after the safe cosmetic fixes (stable React keys in Leaderboard/DeepAnalysis/AngleRewrite, console.debug in VoiceButton catch blocks, test-file cred hygiene). BACKEND: full suite re-run `cd /app/backend && python -m pytest tests/ -q -p no:randomly` = 81/81 PASSED (86s, live Gemini), zero regressions; XML at /app/test_reports/pytest/pytest_results_iter8.xml. FRONTEND (Chromium 1920x1080 + 390x844): (1) Demo login via landing [hero-demo] -> /app dashboard with demo-badge. (2) Full core loop: Create Launch wizard (/app/launch) product -> audience-select -> goal-awareness -> platforms -> auto-generation produced 4 angle cards + virality-score; selecting the 3rd angle rescored to 58/C; Run Deep Analysis returned populated deep-agreement AND deep-difference plus all 5 factor pairs and AI reasons (heuristic 58 vs AI 28); Angle Rewrite on Shareability produced BEFORE/AFTER copy, showed the downgrade warning, keep-improved-btn applied the new angle and rescored to 46/D with a clear 'Applied new version (lower score)' toast; Run Launch created the experiment and routed to /app/experiments/{id}. (3) Experiment detail: run-deep-analysis persists (still rendered after full reload); enter-real-btn -> real-metrics-form (real-impressions/engagement/shares/conversions) -> save-real-btn saved 9000/1200/400/150, pvr-verdict flipped to UNDERPERFORMED (-10.6%), pvr-impressions PRED 17,291 / REAL 9,000 / -47.9%, learning-note sign-correct ('Impressions fell short of the forecast by 48%'), all persisted after reload. (4) Public /report/{id}: report-content renders title, audience, winning angle, virality 46/D matching the API score.overall=46, factor explanations, prediction-vs-reality and the persisted deep_analysis DIFFERENCE block; copy-link/download/new-experiment buttons present. (5) Audience DNA: 2 seeded cards; full CRUD verified — created TEST_Iter8 Audience, edited to TEST_Iter8 Edited, deleted (back to 2 cards); voice-audience-desc mic renders in audience-editor and 1 mic renders on the Create Launch product description. (6) Leaderboard: global=20 rows, mine=10, back to global=20, no key/render warnings. (7) Analytics: 4 stat tiles (10 / 58 / 77% / 170,236), best angle + best platform, 6 recharts surfaces. (8) Theme: theme-light -> html.light + localStorage ll_theme=light, survives reload, theme-dark switches back. (9) ZERO console errors or warnings on every route visited (landing, /app, /app/launch, /app/audiences, /app/experiments, detail, /report/{id}, /app/leaderboard, /app/analytics). No regression found from the cosmetic fix batch.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "AngleRewrite factor chips", "issue": "After clicking keep-improved-btn, the factor chips still showed the pre-apply Shareability value (38) while the ViralityScore panel showed the applied value (30); all other 4 chips matched. Cosmetic stale-state only, no crash.", "selector": "[data-testid^='rewrite-factor-']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Landing at 390px", "issues": ["6px horizontal overflow (document.scrollWidth - innerWidth = 6). /app and /app/launch are 0px. Cosmetic."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_iter7_fixes.py",
+    "/app/test_reports/pytest/pytest_results_iter8.xml"
+  ],
+  "action_items": [
+    "Optional (LOW): refresh AngleRewrite factor chip values from the newly applied angle score after keep-improved so chips and the ViralityScore panel agree.",
+    "Optional (LOW): fix the 6px horizontal overflow on the landing page at 390px width."
+  ],
+  "critical_code_review_comments": [
+    "DeepAnalysis.jsx:95 and AngleRewrite.jsx:82 now use the reason STRING as the React key (key={r}). This removes the index-key warning but reintroduces a duplicate-key risk whenever the LLM/heuristic emits the same reason string twice in one list. Prefer a composite key such as key={`${idx}-${r}`} or key={`${factorKey}-${idx}`} (the pattern already used in ViralityScore).",
+    "Leaderboard.jsx:53 uses key={e.id || i} — fine, ids are always present from the API. Leaderboard.jsx:37 skeleton keys are now literal strings: correct.",
+    "VoiceButton.jsx: catch blocks now log via console.debug; the remaining bare `catch {}` at rec.start() correctly surfaces a toast, so no silent failure remains. Unsupported-browser path renders a disabled-looking mic + toast and never throws — verified no crash.",
+    "Playbook items 2-5 (httpOnly cookies, CORS allow-credentials with explicit origins, 5-attempt brute-force lockout, seed_admin password refresh) remain NOT implemented — localStorage + JWT Bearer is the intentional design per the request. Only item 1 verified: bcrypt hashes start with $2b$ (test_bcrypt_hash_format PASSED). Not a regression.",
+    "Pre-existing note carried from iter7: seed.py does not re-hash DEMO_PASSWORD for an already-existing demo user; harmless today but a trap if the env password is ever rotated."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "100% (81/81 pytest)", "frontend": "100% of tested flows, 0 console errors/warnings" },
+  "seed_data_creation": "Demo account: created campaign 'Iter8 QA' via the UI (has a persisted deep_analysis and real metrics 9000/1200/400/150). Created and then deleted audience 'TEST_Iter8 Audience/Edited'. No seeded demo data modified or removed.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "demo@launchloop.ai / demo1234 — landing CTA testid is 'hero-demo' (no demo-login-btn on landing)",
+  "context_for_next_testing_agent": "Selector corrections vs iter7 notes: the Create Launch route is /app/launch (NOT /app/new). Audience editor testids are audience-editor / audience-name / audience-desc / voice-audience-desc / audience-{motivations|pain_points|interests|desires|content_triggers|channels} / save-audience-btn. Experiment detail real-metrics inputs are real-impressions / real-engagement / real-shares / real-conversions with save-real-btn (there is no submit-type button inside real-metrics-form). Report page wrapper is [data-testid='report-content'] and there is NO virality-score testid there — assert on inner_text. IMPORTANT: the score uses a CountUp animation, so wait ~3-4s before asserting the number (a mid-animation read showed 35 instead of the true 46). Angle cards are [data-testid='angle-{uuid}']; filter out angle-score-* and angle-rewrite. Deep analysis: run-deep-analysis -> deep-analysis-result / deep-agreement / deep-difference. Rewrite: rewrite-factor-{key} -> rewrite-why-weak -> rewrite-angle-btn -> rewrite-result -> keep-improved-btn.",
+  "rca_of_the_issue": "No defects introduced by the iteration-8 cosmetic fix batch. The only new observation is a low-priority stale value in the AngleRewrite factor chips after keep-improved (component keeps its own factor snapshot instead of re-reading the applied angle score) and a 6px landing-page horizontal overflow at 390px. The '35 vs 46' report score seen in a first screenshot was a CountUp animation artifact, confirmed equal to the API value (score.overall=46) after settling."
+}
