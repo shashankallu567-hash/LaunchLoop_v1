@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import ViralityScore from "@/components/ViralityScore";
+import DeepAnalysis from "@/components/DeepAnalysis";
+import AngleRewrite from "@/components/AngleRewrite";
 import {
   ArrowRight, ArrowLeft, Check, Rocket, Dna, Target, Share2, Sparkles, Loader2, Plus,
 } from "lucide-react";
@@ -82,8 +84,16 @@ export default function CreateLaunch() {
     setStep((s) => Math.min(s + 1, 4));
   };
 
-  const runLaunch = async () => {
-    const angle = result.angles.find((a) => a.id === selected);
+  const applyRewrite = (improved) => {
+    setResult((r) => ({
+      ...r,
+      angles: r.angles.map((a) => (a.id === selected
+        ? { ...a, headline: improved.headline, body: improved.body, score: improved.score }
+        : a)),
+    }));
+  };
+
+  const runLaunch = async () => {    const angle = result.angles.find((a) => a.id === selected);
     if (!angle) return;
     setRunning(true);
     try {
@@ -115,11 +125,11 @@ export default function CreateLaunch() {
           <div key={s.id} className="flex items-center gap-2 shrink-0">
             <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${
               step === s.id ? "border-growth/50 bg-growth/10 text-growth"
-              : step > s.id ? "border-white/10 bg-panel text-white" : "border-white/10 bg-panel text-muted-foreground"}`}>
+              : step > s.id ? "border-border bg-panel text-foreground" : "border-border bg-panel text-muted-foreground"}`}>
               {step > s.id ? <Check size={15} /> : <s.icon size={15} />}
               <span className="hidden sm:inline">{s.label}</span>
             </div>
-            {i < STEPS.length - 1 && <div className="h-px w-4 bg-white/10" />}
+            {i < STEPS.length - 1 && <div className="h-px w-4 bg-surface" />}
           </div>
         ))}
       </div>
@@ -127,17 +137,17 @@ export default function CreateLaunch() {
       <AnimatePresence mode="wait">
         <motion.div key={step} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
           {step === 0 && (
-            <div className="rounded-xl border border-white/10 bg-panel p-6 space-y-5 max-w-2xl" data-testid="step-product">
+            <div className="rounded-xl border border-border bg-panel p-6 space-y-5 max-w-2xl" data-testid="step-product">
               <div>
                 <label className="text-xs uppercase tracking-wide text-muted-foreground">Product name</label>
                 <input value={form.product_name} onChange={(e) => setForm({ ...form, product_name: e.target.value })} data-testid="input-product-name"
-                  placeholder="e.g. TaskFlow" className="mt-1.5 w-full bg-surface border border-white/10 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50" />
+                  placeholder="e.g. TaskFlow" className="mt-1.5 w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50" />
               </div>
               <div>
                 <label className="text-xs uppercase tracking-wide text-muted-foreground">What does it do?</label>
                 <textarea value={form.product_description} onChange={(e) => setForm({ ...form, product_description: e.target.value })} data-testid="input-product-desc"
                   rows={4} placeholder="AI task manager that plans your day automatically…"
-                  className="mt-1.5 w-full bg-surface border border-white/10 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 resize-none" />
+                  className="mt-1.5 w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 resize-none" />
               </div>
             </div>
           )}
@@ -145,10 +155,10 @@ export default function CreateLaunch() {
           {step === 1 && (
             <div className="space-y-4" data-testid="step-audience">
               {audiences.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-white/15 bg-panel p-10 text-center">
-                  <Dna className="mx-auto text-white/30" size={26} />
+                <div className="rounded-xl border border-dashed border-border bg-panel p-10 text-center">
+                  <Dna className="mx-auto text-foreground/30" size={26} />
                   <p className="text-sm text-muted-foreground mt-3">No audience profiles yet.</p>
-                  <button onClick={() => navigate("/app/audiences")} className="mt-4 inline-flex items-center gap-2 bg-white text-black font-semibold px-4 py-2 rounded-lg text-sm">
+                  <button onClick={() => navigate("/app/audiences")} className="mt-4 inline-flex items-center gap-2 bg-foreground text-background font-semibold px-4 py-2 rounded-lg text-sm">
                     <Plus size={16} /> Create Audience DNA
                   </button>
                 </div>
@@ -156,7 +166,7 @@ export default function CreateLaunch() {
                 <div className="grid md:grid-cols-2 gap-4">
                   {audiences.map((a) => (
                     <button key={a.id} onClick={() => setForm({ ...form, audience_id: a.id })} data-testid={`audience-select-${a.id}`}
-                      className={`text-left rounded-xl border p-5 transition-colors ${form.audience_id === a.id ? "border-growth/60 bg-growth/5" : "border-white/10 bg-panel hover:border-white/20"}`}>
+                      className={`text-left rounded-xl border p-5 transition-colors ${form.audience_id === a.id ? "border-growth/60 bg-growth/5" : "border-border bg-panel hover:border-borderStrong"}`}>
                       <div className="flex items-center justify-between">
                         <div className="font-heading font-bold">{a.name}</div>
                         {form.audience_id === a.id && <Check size={16} className="text-growth" />}
@@ -178,7 +188,7 @@ export default function CreateLaunch() {
             <div className="grid md:grid-cols-2 gap-4 max-w-3xl" data-testid="step-goal">
               {GOALS.map((g) => (
                 <button key={g.id} onClick={() => setForm({ ...form, goal: g.id })} data-testid={`goal-${g.id}`}
-                  className={`text-left rounded-xl border p-5 transition-colors ${form.goal === g.id ? "border-growth/60 bg-growth/5" : "border-white/10 bg-panel hover:border-white/20"}`}>
+                  className={`text-left rounded-xl border p-5 transition-colors ${form.goal === g.id ? "border-growth/60 bg-growth/5" : "border-border bg-panel hover:border-borderStrong"}`}>
                   <div className="flex items-center justify-between">
                     <div className="font-medium">{g.label}</div>
                     {form.goal === g.id && <Check size={16} className="text-growth" />}
@@ -190,12 +200,12 @@ export default function CreateLaunch() {
           )}
 
           {step === 3 && (
-            <div className="rounded-xl border border-white/10 bg-panel p-6 max-w-2xl" data-testid="step-platforms">
+            <div className="rounded-xl border border-border bg-panel p-6 max-w-2xl" data-testid="step-platforms">
               <div className="text-sm text-muted-foreground mb-4">Pick the platforms you'll launch on. Angles are tailored to each.</div>
               <div className="flex flex-wrap gap-2.5">
                 {PLATFORMS.map((p) => (
                   <button key={p} onClick={() => togglePlatform(p)} data-testid={`platform-${p}`}
-                    className={`px-4 py-2 rounded-full border text-sm transition-colors ${form.platforms.includes(p) ? "border-growth/60 bg-growth/10 text-growth" : "border-white/10 bg-surface text-muted-foreground hover:text-white"}`}>
+                    className={`px-4 py-2 rounded-full border text-sm transition-colors ${form.platforms.includes(p) ? "border-growth/60 bg-growth/10 text-growth" : "border-border bg-surface text-muted-foreground hover:text-foreground"}`}>
                     {p}
                   </button>
                 ))}
@@ -208,19 +218,19 @@ export default function CreateLaunch() {
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className="text-sm text-muted-foreground">
                   {generating ? "Generating launch angles…" : result
-                    ? <>Pick your winning angle. <span className="text-white">{selectedAudience?.name}</span> · {form.goal} · {form.platforms.join(", ")}</>
+                    ? <>Pick your winning angle. <span className="text-foreground">{selectedAudience?.name}</span> · {form.goal} · {form.platforms.join(", ")}</>
                     : "Ready to generate."}
                 </div>
                 {!generating && result && (
-                  <button onClick={doGenerate} data-testid="regenerate-btn" className="text-xs border border-white/15 px-3 py-1.5 rounded-lg hover:bg-surface transition-colors">Regenerate</button>
+                  <button onClick={doGenerate} data-testid="regenerate-btn" className="text-xs border border-border px-3 py-1.5 rounded-lg hover:bg-surface transition-colors">Regenerate</button>
                 )}
               </div>
 
               {generating ? (
                 <div className="grid md:grid-cols-2 gap-4">
                   {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="h-52 rounded-xl border border-white/10 bg-panel animate-pulse flex items-center justify-center">
-                      <Loader2 className="animate-spin text-white/20" />
+                    <div key={i} className="h-52 rounded-xl border border-border bg-panel animate-pulse flex items-center justify-center">
+                      <Loader2 className="animate-spin text-foreground/20" />
                     </div>
                   ))}
                 </div>
@@ -229,7 +239,7 @@ export default function CreateLaunch() {
                   <div className="grid md:grid-cols-2 gap-4">
                     {result.angles.map((a) => (
                       <button key={a.id} onClick={() => setSelected(a.id)} data-testid={`angle-${a.id}`}
-                        className={`text-left rounded-xl border p-5 transition-colors ${selected === a.id ? "border-growth/60 bg-growth/5" : "border-white/10 bg-panel hover:border-white/20"}`}>
+                        className={`text-left rounded-xl border p-5 transition-colors ${selected === a.id ? "border-growth/60 bg-growth/5" : "border-border bg-panel hover:border-borderStrong"}`}>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[11px] px-2 py-0.5 rounded-full bg-surface text-muted-foreground">{a.channel} · {a.format}</span>
                           <ViralityScore score={a.score} compact testid={`angle-score-${a.id}`} />
@@ -241,24 +251,33 @@ export default function CreateLaunch() {
                     ))}
                   </div>
 
-                  {selected && (
-                    <div className="grid lg:grid-cols-2 gap-4">
-                      <ViralityScore score={result.angles.find((a) => a.id === selected).score} />
-                      <div className="rounded-xl border border-white/10 bg-panel p-6 flex flex-col justify-between">
+                  {selected && (() => {
+                    const selAngle = result.angles.find((a) => a.id === selected);
+                    return (
+                    <div className="space-y-4">
+                      <div className="grid lg:grid-cols-2 gap-4">
+                        <ViralityScore score={selAngle.score} />
+                        <DeepAnalysis headline={selAngle.headline} body={selAngle.body} audience={result.audience}
+                          goal={form.goal} platform={selAngle.channel} heuristic={selAngle.score} />
+                      </div>
+                      <AngleRewrite angle={selAngle} audience={result.audience} goal={form.goal}
+                        platform={selAngle.channel} onApply={applyRewrite} />
+                      <div className="rounded-xl border border-border bg-panel p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                           <h3 className="font-heading font-bold text-lg">Launch this angle</h3>
-                          <p className="text-sm text-muted-foreground mt-2">
+                          <p className="text-sm text-muted-foreground mt-1 max-w-lg">
                             Running the launch generates a predicted outcome, then a synthetic reality so you can
                             compare and learn. You can swap in real numbers anytime.
                           </p>
                         </div>
                         <button onClick={runLaunch} disabled={running} data-testid="run-launch-btn"
-                          className="mt-5 flex items-center justify-center gap-2 bg-growth text-black font-semibold py-3 rounded-lg transition-transform hover:scale-[0.98] active:scale-95 disabled:opacity-60">
+                          className="shrink-0 flex items-center justify-center gap-2 bg-growth text-black font-semibold px-6 py-3 rounded-lg transition-transform hover:scale-[0.98] active:scale-95 disabled:opacity-60">
                           {running ? <><Loader2 size={18} className="animate-spin" /> Launching…</> : <><Rocket size={18} /> Run Launch</>}
                         </button>
                       </div>
                     </div>
-                  )}
+                    );
+                  })()}
                 </>
               ) : (
                 <button onClick={doGenerate} className="bg-growth text-black font-semibold px-6 py-3 rounded-lg">Generate</button>
@@ -272,11 +291,11 @@ export default function CreateLaunch() {
       {step < 4 && (
         <div className="flex items-center justify-between max-w-3xl">
           <button onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0} data-testid="step-back"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-white disabled:opacity-30 transition-colors">
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors">
             <ArrowLeft size={16} /> Back
           </button>
           <button onClick={next} disabled={!canNext()} data-testid="step-next"
-            className="flex items-center gap-2 bg-white text-black font-semibold px-5 py-2.5 rounded-lg transition-transform hover:scale-[0.98] active:scale-95 disabled:opacity-40">
+            className="flex items-center gap-2 bg-foreground text-background font-semibold px-5 py-2.5 rounded-lg transition-transform hover:scale-[0.98] active:scale-95 disabled:opacity-40">
             {step === 3 ? "Generate angles" : "Continue"} <ArrowRight size={16} />
           </button>
         </div>

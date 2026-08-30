@@ -81,18 +81,18 @@ export default function AudienceDNA() {
       </div>
 
       {loading ? (
-        <div className="grid md:grid-cols-2 gap-4">{[0, 1].map((i) => <div key={i} className="h-64 rounded-xl border border-white/10 bg-panel animate-pulse" />)}</div>
+        <div className="grid md:grid-cols-2 gap-4">{[0, 1].map((i) => <div key={i} className="h-64 rounded-xl border border-border bg-panel animate-pulse" />)}</div>
       ) : items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/15 bg-panel p-12 text-center">
-          <Users className="mx-auto text-white/30" size={30} />
+        <div className="rounded-xl border border-dashed border-border bg-panel p-12 text-center">
+          <Users className="mx-auto text-foreground/30" size={30} />
           <p className="text-sm text-muted-foreground mt-3">No audience profiles yet.</p>
-          <button onClick={openNew} className="mt-4 inline-flex items-center gap-2 bg-white text-black font-semibold px-4 py-2 rounded-lg text-sm"><Plus size={16} /> Create your first</button>
+          <button onClick={openNew} className="mt-4 inline-flex items-center gap-2 bg-foreground text-background font-semibold px-4 py-2 rounded-lg text-sm"><Plus size={16} /> Create your first</button>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {items.map((a, idx) => (
             <motion.div key={a.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-              className="rounded-xl border border-white/10 bg-panel p-6 hover:border-white/20 transition-colors" data-testid={`audience-card-${a.id}`}>
+              className="rounded-xl border border-border bg-panel p-6 hover:border-borderStrong transition-colors" data-testid={`audience-card-${a.id}`}>
               <div className="flex items-start justify-between">
                 <div>
                   <div className="font-heading text-lg font-bold">{a.name}</div>
@@ -100,7 +100,7 @@ export default function AudienceDNA() {
                   {a.demographics && <div className="text-xs text-muted-foreground mt-1">{a.demographics}</div>}
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => openEdit(a)} data-testid={`edit-audience-${a.id}`} className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-surface transition-colors"><Pencil size={15} /></button>
+                  <button onClick={() => openEdit(a)} data-testid={`edit-audience-${a.id}`} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors"><Pencil size={15} /></button>
                   <button onClick={() => remove(a.id)} data-testid={`delete-audience-${a.id}`} className="p-2 rounded-lg text-muted-foreground hover:text-danger hover:bg-surface transition-colors"><Trash2 size={15} /></button>
                 </div>
               </div>
@@ -111,18 +111,18 @@ export default function AudienceDNA() {
                     <div key={s.key}>
                       <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5"><s.icon size={12} /> {s.label}</div>
                       <div className="flex flex-wrap gap-1.5">
-                        {a[s.key].map((v) => <span key={v} className="text-[11px] px-2 py-0.5 rounded-full bg-surface text-white/80">{v}</span>)}
+                        {a[s.key].map((v) => <span key={v} className="text-[11px] px-2 py-0.5 rounded-full bg-surface text-foreground/80">{v}</span>)}
                       </div>
                     </div>
                   )
                 ))}
                 {a.sharing_behavior && (
-                  <div className="text-xs text-muted-foreground pt-1"><span className="text-white/70">Sharing behavior: </span>{a.sharing_behavior}</div>
+                  <div className="text-xs text-muted-foreground pt-1"><span className="text-foreground/70">Sharing behavior: </span>{a.sharing_behavior}</div>
                 )}
               </div>
 
               <button onClick={() => navigate("/app/launch")} data-testid={`use-audience-${a.id}`}
-                className="mt-5 w-full flex items-center justify-center gap-2 border border-white/15 py-2.5 rounded-lg text-sm hover:bg-surface transition-colors">
+                className="mt-5 w-full flex items-center justify-center gap-2 border border-border py-2.5 rounded-lg text-sm hover:bg-surface transition-colors">
                 <Rocket size={15} /> Use in a launch
               </button>
             </motion.div>
@@ -134,10 +134,10 @@ export default function AudienceDNA() {
       {editing && (
         <div className="fixed inset-0 z-50 flex justify-end" data-testid="audience-editor">
           <div className="absolute inset-0 bg-black/70" onClick={close} />
-          <div className="relative w-full max-w-lg bg-panel border-l border-white/10 h-full overflow-y-auto p-6">
+          <div className="relative w-full max-w-lg bg-panel border-l border-border h-full overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-heading text-xl font-bold">{editing === "new" ? "New Audience" : "Edit Audience"}</h2>
-              <button onClick={close} className="p-2 text-muted-foreground hover:text-white"><X size={20} /></button>
+              <button onClick={close} className="p-2 text-muted-foreground hover:text-foreground"><X size={20} /></button>
             </div>
             <div className="space-y-4">
               <Field label="Name"><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} data-testid="audience-name" className="ll-input" placeholder="Indie SaaS Founders" /></Field>
@@ -158,7 +158,7 @@ export default function AudienceDNA() {
               <button onClick={aiRefresh} data-testid="ai-refresh-btn" className="flex items-center gap-2 border border-growth/40 bg-growth/10 text-growth text-sm font-semibold px-4 py-2.5 rounded-lg transition-transform hover:scale-[0.98] active:scale-95">
                 <Sparkles size={15} /> AI suggest
               </button>
-              <button onClick={save} disabled={saving} data-testid="save-audience-btn" className="flex-1 bg-white text-black font-semibold py-2.5 rounded-lg transition-transform hover:scale-[0.99] active:scale-95 disabled:opacity-60">
+              <button onClick={save} disabled={saving} data-testid="save-audience-btn" className="flex-1 bg-foreground text-background font-semibold py-2.5 rounded-lg transition-transform hover:scale-[0.99] active:scale-95 disabled:opacity-60">
                 {saving ? "Saving…" : "Save audience"}
               </button>
             </div>
@@ -166,7 +166,7 @@ export default function AudienceDNA() {
         </div>
       )}
 
-      <style>{`.ll-input{width:100%;background:#141417;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 12px;font-size:14px;color:#fff}.ll-input:focus{outline:none;box-shadow:0 0 0 2px rgba(255,255,255,.4)}`}</style>
+      <style>{`.ll-input{width:100%;background:var(--elevated);border:1px solid hsl(var(--border));border-radius:8px;padding:10px 12px;font-size:14px;color:hsl(var(--foreground))}.ll-input:focus{outline:none;box-shadow:0 0 0 2px hsl(var(--ring))}`}</style>
     </div>
   );
 }

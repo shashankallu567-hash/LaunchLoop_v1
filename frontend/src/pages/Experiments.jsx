@@ -40,12 +40,12 @@ export default function Experiments() {
       </div>
 
       {loading ? (
-        <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="h-24 rounded-xl border border-white/10 bg-panel animate-pulse" />)}</div>
+        <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="h-24 rounded-xl border border-border bg-panel animate-pulse" />)}</div>
       ) : items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/15 bg-panel p-12 text-center">
-          <FlaskConical className="mx-auto text-white/30" size={30} />
+        <div className="rounded-xl border border-dashed border-border bg-panel p-12 text-center">
+          <FlaskConical className="mx-auto text-foreground/30" size={30} />
           <p className="text-sm text-muted-foreground mt-3">No experiments yet.</p>
-          <button onClick={() => navigate("/app/launch")} className="mt-4 inline-flex items-center gap-2 bg-white text-black font-semibold px-4 py-2 rounded-lg text-sm"><Rocket size={16} /> Create Launch</button>
+          <button onClick={() => navigate("/app/launch")} className="mt-4 inline-flex items-center gap-2 bg-foreground text-background font-semibold px-4 py-2 rounded-lg text-sm"><Rocket size={16} /> Create Launch</button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -56,7 +56,7 @@ export default function Experiments() {
               <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04 }}
                 onClick={() => navigate(`/app/experiments/${c.id}`)} data-testid={`experiment-${c.id}`} role="button" tabIndex={0}
                 onKeyDown={(e) => { if (e.key === "Enter") navigate(`/app/experiments/${c.id}`); }}
-                className="w-full cursor-pointer text-left rounded-xl border border-white/10 bg-panel p-5 flex flex-wrap items-center justify-between gap-4 hover:border-white/20 transition-colors">
+                className="w-full cursor-pointer text-left rounded-xl border border-border bg-panel p-5 flex flex-wrap items-center justify-between gap-4 hover:border-borderStrong transition-colors">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-heading font-bold">{c.product_name}</span>

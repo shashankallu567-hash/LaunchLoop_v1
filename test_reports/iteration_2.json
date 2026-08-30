@@ -1,0 +1,41 @@
+{
+  "summary": "Iteration-2 full test of LaunchLoop AI (new AI endpoints + theme system + core-loop regression). BACKEND: 52/52 pytest passing — added /app/backend/tests/test_ai_features.py (15 live API tests for POST /api/deep-analysis and POST /api/rewrite: auth 401, response shape, 5 factors 0-100, comparison/factor_diffs math, heuristic determinism, rewrite per-factor parametrised, improved.score is a real deterministic re-score matching /api/score, weak-factor lift, unknown-factor and empty-payload no-500, no _id leak) and /app/backend/tests/test_ai_fallback.py (8 unit tests proving graceful degradation: source='fallback' with no EMERGENT_LLM_KEY and on simulated LLM outage for both deep_analysis and rewrite_angle; fallback rewrite raises the targeted factor for all 5 factors; fallback deep-analysis is deterministic). Existing 29-test regression suite (auth/demo, audiences CRUD, generate+cache, campaign loop, real-outcome override, resynth, public report, leaderboard, analytics, isolation) still 29/29. Live Gemini path confirmed: no LLM-failure warnings in backend logs, source='ai'. FRONTEND: theme system fully verified — landing/sidebar/report ThemeToggle visible, Light removes 'dark' class + persists across reload, Dark adds it + persists across reload, System follows emulated OS color-scheme (light->'light', dark->'dark'), localStorage 'll_theme' written correctly. Full loop verified end-to-end in both themes: demo login -> wizard (Product/Audience/Goal/Platforms) -> Gemini generation (4 angle cards) -> select angle -> Angle Rewrite (all 5 factor chips, why-weak, rewrite -> Before/After + factor before->after + overall + what-changed + Keep Improved/Keep Original/Try Again; Keep Improved updated the selected card headline and its ViralityScore and Run Launch used the improved angle) -> Deep Analysis (Heuristic 57 vs AI 54, agreement line, difference line, 5-factor mini comparison, 3 AI reasons) -> Run Launch -> Experiment Detail (4 stages, Deep Analysis card present & working in PREDICTION stage, verdict OVERPERFORMED, real metrics saved and verdict recalculated to +195.6%, resynth changed it to +13.8%, learning note) -> public Report (theme toggle works, copy link/download/new experiment present). Leaderboard scope toggle 14 global vs 4 mine. Analytics rendered 6 recharts charts in BOTH themes. ZERO console errors AND zero console warnings on every page — the previous button-in-button nesting warning on Experiments.jsx is confirmed gone. No horizontal overflow (scrollWidth == innerWidth on report page).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/deep-analysis", "issue": "Untyped dict body (by design) — no Pydantic validation; empty {} payload returns a 200 scoring of empty strings instead of 422."},
+      {"endpoint": "POST /api/rewrite", "issue": "Untyped dict body — an arbitrary weak_factor (e.g. 'not_a_factor') is accepted and echoed back, falling through to the platform_fit fallback branch; consider a Literal enum of the 5 factor keys."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Angle Rewrite -> Keep Improved", "issue": "Rewrite can DEGRADE the score and the UI still labels the result 'After'/'Keep Improved'. Observed live: picking Hook Strength (86) produced hook 86->63 and overall 63->57, and Keep Improved silently applied the worse angle to the selected card. Backend behaviour is correct (deterministic re-score), but the UI should surface a 'score went down' warning (or colour the delta red) and/or only offer chips that are actually weak. Not a blocker.", "affected_selectors": ["[data-testid=\"rewrite-result\"]", "[data-testid=\"keep-improved-btn\"]"]}
+    ],
+    "design_issues": [
+      {"screen": "Analytics (LIGHT theme)", "issues": ["'predicted' legend label and the predicted bars in 'Predicted vs Actual Impressions' are a very pale grey on white — low contrast vs the 'actual' series; darken the predicted series/legend text in light mode."]},
+      {"screen": "Angle Rewrite card", "issues": ["Heading reads 'Why Hook Strength is at 86' followed by positive reasons when a strong factor is chosen — copy implies weakness; consider hiding/labelling non-weak factors differently."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_ai_features.py", "/app/backend/tests/test_ai_fallback.py", "/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Optional: warn/colour-code when a rewrite lowers the overall or targeted factor score before 'Keep Improved'.",
+    "Optional: improve light-theme contrast for the 'predicted' series + legend in the Analytics bar chart.",
+    "Optional: add Pydantic models (with a Literal factor enum) for /api/deep-analysis and /api/rewrite."
+  ],
+  "critical_code_review_comments": [
+    "llm_service.deep_analysis/rewrite_angle correctly wrap the LLM call in try/except and always return a usable payload with source='ai'|'fallback' — verified by unit tests with the key removed and with a simulated outage.",
+    "server.py /rewrite always re-scores the improved copy with virality.score_angle, so improved.score is trustworthy and matches /api/score exactly (verified).",
+    "_build_comparison assumes heuristic['factors'] always has the 5 keys; safe today because the heuristic is server-computed when the client omits it, but a client-supplied malformed 'heuristic' dict would 500 (KeyError) — validate it.",
+    "ThemeToggle correctly guards against hydration mismatch with a mounted flag and a same-size placeholder; no layout shift observed.",
+    "No MongoDB _id leaked in any of the new endpoint responses."
+  ],
+  "updated_files": ["/app/backend/tests/test_ai_features.py", "/app/backend/tests/test_ai_fallback.py"],
+  "success_rate": {"backend": "100% (52/52 pytest)", "frontend": "100% of tested flows (0 console errors, 2 cosmetic/UX notes)"},
+  "seed_data_creation": "One demo-user campaign 'QA DeepTest' created via the UI loop (left in place; also cached angles for that product in angle_cache). Backend suites clean up their own TEST_ data.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "demo@launchloop.ai / demo1234 (or POST /api/auth/demo)",
+  "context_for_next_testing_agent": "Backend: run `cd /app/backend && python -m pytest tests/ -q` (52 tests; ~100s because deep-analysis/rewrite hit live Gemini, allow 120s timeouts). New testids verified: theme-toggle/theme-light/theme-dark/theme-system (2 in DOM on /app — sidebar + mobile header — use ':visible' and .first), run-deep-analysis, deep-analysis-result, deep-agreement, deep-difference, deep-rerun, rewrite-factor-{hook,emotion,audience_fit,shareability,platform_fit}, rewrite-why-weak, rewrite-angle-btn, rewrite-result, keep-improved-btn, keep-original-btn, try-again-btn. CAUTION: selector [data-testid^=\"angle-\"] also matches angle-score-* and angle-rewrite (4 cards => 9 matches) — use it with care. On the Platforms wizard step Twitter/X is PRE-SELECTED, so blindly clicking the first platform chip deselects it and leaves step-next disabled. localStorage key is 'll_theme'; next-themes sets class 'light' or 'dark' on <html>.",
+  "rca_of_the_issue": "No functional defect found. The only behavioural nuance: /api/rewrite rewrites for whichever factor the user picks and re-scores deterministically, so choosing an already-strong factor can lower both that factor and the overall score; the UI presents it unconditionally as 'improved'. Root cause is UI framing, not the scoring engine."
+}

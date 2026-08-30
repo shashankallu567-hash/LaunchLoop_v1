@@ -155,6 +155,64 @@ async def score_text(payload: dict, current=Depends(get_current_user)):
                                 payload.get("audience"), payload.get("platform"))
 
 
+def _build_comparison(heuristic, ai):
+    hf = {k: heuristic["factors"][k]["score"] for k in heuristic["factors"]}
+    af = ai["factors"]
+    factor_diffs = []
+    for k in hf:
+        factor_diffs.append({"key": k, "label": heuristic["factors"][k]["label"],
+                             "heuristic": hf[k], "ai": af.get(k, hf[k]), "diff": af.get(k, hf[k]) - hf[k]})
+    agree = [d for d in factor_diffs if d["heuristic"] >= 70 and d["ai"] >= 70 and abs(d["diff"]) <= 12]
+    if agree:
+        names = " and ".join(d["label"] for d in agree[:2])
+        agreement = f"Both methods strongly agree that {names} {'are' if len(agree) > 1 else 'is'} strong."
+    else:
+        close = [d for d in factor_diffs if abs(d["diff"]) <= 10]
+        agreement = (f"Both methods land within a few points on {', '.join(d['label'] for d in close[:2])}."
+                     if close else "The two methods take noticeably different views across the board.")
+    biggest = max(factor_diffs, key=lambda d: abs(d["diff"]))
+    if biggest["diff"] < 0:
+        difference = f"AI is less confident in {biggest['label']} (heuristic {biggest['heuristic']} vs AI {biggest['ai']}) — the message may be too broad."
+    elif biggest["diff"] > 0:
+        difference = f"AI rates {biggest['label']} higher than the heuristic (heuristic {biggest['heuristic']} vs AI {biggest['ai']})."
+    else:
+        difference = "AI and the heuristic are closely aligned on every factor."
+    return {"overall_diff": ai["overall"] - heuristic["overall"], "agreement": agreement,
+            "difference": difference, "factor_diffs": factor_diffs}
+
+
+@api.post("/deep-analysis")
+async def deep_analysis_ep(payload: dict, current=Depends(get_current_user)):
+    headline = payload.get("headline", "")
+    body = payload.get("body", "")
+    audience = payload.get("audience")
+    goal = payload.get("goal", "awareness")
+    platform = payload.get("platform")
+    heuristic = payload.get("heuristic")
+    if not isinstance(heuristic, dict) or len(heuristic.get("factors", {})) != 5:
+        heuristic = virality.score_angle(headline, body, audience, platform)
+    ai = await llm_service.deep_analysis(headline, body, audience, goal, platform, heuristic)
+    return {"heuristic": heuristic, "ai": ai, "comparison": _build_comparison(heuristic, ai)}
+
+
+@api.post("/rewrite")
+async def rewrite_ep(payload: dict, current=Depends(get_current_user)):
+    headline = payload.get("headline", "")
+    body = payload.get("body", "")
+    weak_factor = payload.get("weak_factor", "hook")
+    audience = payload.get("audience")
+    goal = payload.get("goal", "awareness")
+    platform = payload.get("platform")
+    before = payload.get("before_score") or virality.score_angle(headline, body, audience, platform)
+    rw = await llm_service.rewrite_angle(headline, body, weak_factor, audience, goal, platform)
+    after = virality.score_angle(rw["headline"], rw["body"], audience, platform)
+    return {
+        "weak_factor": weak_factor, "source": rw["source"], "what_changed": rw["what_changed"],
+        "original": {"headline": headline, "body": body, "score": before},
+        "improved": {"headline": rw["headline"], "body": rw["body"], "score": after},
+    }
+
+
 # ---------------- campaigns ----------------
 @api.post("/campaigns")
 async def create_campaign(payload: CampaignCreate, current=Depends(get_current_user)):

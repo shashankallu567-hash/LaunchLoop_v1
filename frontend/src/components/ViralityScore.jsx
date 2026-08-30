@@ -4,14 +4,14 @@ import CountUp from "@/components/CountUp";
 const FACTOR_ORDER = ["hook", "emotion", "audience_fit", "shareability", "platform_fit"];
 
 function barColor(v) {
-  if (v >= 75) return "#D3FF24";
-  if (v >= 55) return "#0066FF";
-  if (v >= 40) return "#F5A623";
-  return "#FF3366";
+  if (v >= 75) return "var(--score-strong)";
+  if (v >= 55) return "var(--score-mid)";
+  if (v >= 40) return "var(--warning)";
+  return "var(--score-weak)";
 }
 
 function gradeColor(grade) {
-  return { A: "#D3FF24", B: "#0066FF", C: "#F5A623", D: "#FF3366" }[grade] || "#A1A1AA";
+  return { A: "var(--score-strong)", B: "var(--score-mid)", C: "var(--warning)", D: "var(--score-weak)" }[grade] || "hsl(var(--muted-foreground))";
 }
 
 export default function ViralityScore({ score, compact = false, testid = "virality-score" }) {
@@ -26,7 +26,7 @@ export default function ViralityScore({ score, compact = false, testid = "virali
         </div>
         <div className="flex gap-1">
           {factors.map((f) => (
-            <div key={f.key} className="h-6 w-1.5 rounded-full bg-white/10 overflow-hidden flex flex-col justify-end" title={`${f.label}: ${f.score}`}>
+            <div key={f.key} className="h-6 w-1.5 rounded-full bg-surface overflow-hidden flex flex-col justify-end" title={`${f.label}: ${f.score}`}>
               <div style={{ height: `${f.score}%`, backgroundColor: barColor(f.score) }} />
             </div>
           ))}
@@ -36,7 +36,7 @@ export default function ViralityScore({ score, compact = false, testid = "virali
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-panel p-6" data-testid={testid}>
+    <div className="rounded-xl border border-border bg-panel p-6" data-testid={testid}>
       <div className="flex items-start justify-between gap-6 mb-6">
         <div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Virality Score</div>
@@ -67,7 +67,7 @@ export default function ViralityScore({ score, compact = false, testid = "virali
                 {f.score}
               </span>
             </div>
-            <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+            <div className="h-2 rounded-full bg-track overflow-hidden">
               <motion.div className="h-full rounded-full"
                 initial={{ width: 0 }} animate={{ width: `${f.score}%` }}
                 transition={{ delay: i * 0.06 + 0.1, duration: 0.6, ease: "easeOut" }}
@@ -76,7 +76,7 @@ export default function ViralityScore({ score, compact = false, testid = "virali
             <ul className="mt-1.5 space-y-0.5">
               {f.reasons.map((r, j) => (
                 <li key={j} className="text-xs text-muted-foreground flex gap-1.5">
-                  <span className="text-white/30 mt-px">›</span>{r}
+                  <span className="text-foreground/30 mt-px">›</span>{r}
                 </li>
               ))}
             </ul>
@@ -84,7 +84,7 @@ export default function ViralityScore({ score, compact = false, testid = "virali
         ))}
       </div>
 
-      <div className="mt-5 pt-4 border-t border-white/10 text-xs text-muted-foreground">
+      <div className="mt-5 pt-4 border-t border-border text-xs text-muted-foreground">
         Overall = weighted sum of the five factors above. Deterministic &amp; explainable — the same copy always scores the same.
       </div>
     </div>

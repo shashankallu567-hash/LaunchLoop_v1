@@ -10,15 +10,15 @@ import {
 } from "lucide-react";
 
 const LOOP = [
-  { label: "PREDICTION", icon: Target, color: "#0066FF" },
-  { label: "LAUNCH", icon: Rocket, color: "#FFFFFF" },
-  { label: "REALITY", icon: Activity, color: "#D3FF24" },
-  { label: "LEARNING", icon: Brain, color: "#FF3366" },
+  { label: "PREDICTION", icon: Target, color: "var(--info)" },
+  { label: "LAUNCH", icon: Rocket, color: "hsl(var(--foreground))" },
+  { label: "REALITY", icon: Activity, color: "var(--pos)" },
+  { label: "LEARNING", icon: Brain, color: "var(--neg)" },
 ];
 
 function Stat({ label, value, suffix = "", testid }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-panel p-5" data-testid={testid}>
+    <div className="rounded-xl border border-border bg-panel p-5" data-testid={testid}>
       <div className="text-xs uppercase tracking-widest text-muted-foreground mb-2">{label}</div>
       <div className="font-mono-metric text-3xl font-bold">
         <CountUp value={value} />{suffix}
@@ -59,7 +59,7 @@ export default function Dashboard() {
 
       {loading ? (
         <div className="grid md:grid-cols-4 gap-4">
-          {[0, 1, 2, 3].map((i) => <div key={i} className="h-28 rounded-xl border border-white/10 bg-panel animate-pulse" />)}
+          {[0, 1, 2, 3].map((i) => <div key={i} className="h-28 rounded-xl border border-border bg-panel animate-pulse" />)}
         </div>
       ) : t ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -71,17 +71,17 @@ export default function Dashboard() {
       ) : null}
 
       {/* Loop visual */}
-      <div className="rounded-xl border border-white/10 bg-panel p-6 grain">
+      <div className="rounded-xl border border-border bg-panel p-6 grain">
         <div className="text-xs uppercase tracking-widest text-muted-foreground mb-5">Your Launch Twin loop</div>
         <div className="grid grid-cols-2 md:grid-cols-7 items-center gap-3">
           {LOOP.map((s, i) => (
             <Fragment key={s.label}>
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                className="rounded-lg border border-white/10 bg-surface p-4 flex flex-col items-center text-center">
+                className="rounded-lg border border-border bg-surface p-4 flex flex-col items-center text-center">
                 <s.icon size={20} style={{ color: s.color }} />
                 <div className="font-mono-metric text-xs font-bold mt-2" style={{ color: s.color }}>{s.label}</div>
               </motion.div>
-              {i < LOOP.length - 1 && <ArrowRight className="hidden md:block mx-auto text-white/20" size={18} />}
+              {i < LOOP.length - 1 && <ArrowRight className="hidden md:block mx-auto text-foreground/20" size={18} />}
             </Fragment>
           ))}
         </div>
@@ -92,14 +92,14 @@ export default function Dashboard() {
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-heading text-lg font-bold flex items-center gap-2"><FlaskConical size={18} /> Recent experiments</h2>
-            <button onClick={() => navigate("/app/experiments")} className="text-xs text-muted-foreground hover:text-white transition-colors" data-testid="view-all-experiments">View all</button>
+            <button onClick={() => navigate("/app/experiments")} className="text-xs text-muted-foreground hover:text-foreground transition-colors" data-testid="view-all-experiments">View all</button>
           </div>
           {campaigns.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/15 bg-panel p-10 text-center">
-              <Rocket className="mx-auto text-white/30" size={28} />
+            <div className="rounded-xl border border-dashed border-border bg-panel p-10 text-center">
+              <Rocket className="mx-auto text-foreground/30" size={28} />
               <p className="text-sm text-muted-foreground mt-3">No experiments yet. Create your first launch.</p>
               <button onClick={() => navigate("/app/launch")} data-testid="empty-create-launch"
-                className="mt-4 inline-flex items-center gap-2 bg-white text-black font-semibold px-4 py-2 rounded-lg text-sm transition-transform hover:scale-[0.98] active:scale-95">
+                className="mt-4 inline-flex items-center gap-2 bg-foreground text-background font-semibold px-4 py-2 rounded-lg text-sm transition-transform hover:scale-[0.98] active:scale-95">
                 <Zap size={16} /> Create Launch
               </button>
             </div>
@@ -107,7 +107,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               {campaigns.slice(0, 4).map((c) => (
                 <button key={c.id} onClick={() => navigate(`/app/experiments/${c.id}`)} data-testid={`recent-campaign-${c.id}`}
-                  className="w-full text-left rounded-xl border border-white/10 bg-panel p-4 flex items-center justify-between gap-4 hover:border-white/20 transition-colors">
+                  className="w-full text-left rounded-xl border border-border bg-panel p-4 flex items-center justify-between gap-4 hover:border-borderStrong transition-colors">
                   <div className="min-w-0">
                     <div className="font-medium truncate">{c.product_name}</div>
                     <div className="text-sm text-muted-foreground truncate">{c.angle.headline}</div>
@@ -129,7 +129,7 @@ export default function Dashboard() {
             { to: "/app/analytics", icon: Activity, label: "Analytics", note: "Trends & accuracy" },
           ].map((q) => (
             <button key={q.to} onClick={() => navigate(q.to)} data-testid={`jump-${q.label.toLowerCase().replace(/\s/g, "-")}`}
-              className="w-full text-left rounded-xl border border-white/10 bg-panel p-4 flex items-center gap-3 hover:border-white/20 transition-colors">
+              className="w-full text-left rounded-xl border border-border bg-panel p-4 flex items-center gap-3 hover:border-borderStrong transition-colors">
               <div className="h-9 w-9 rounded-lg bg-surface flex items-center justify-center"><q.icon size={18} className="text-growth" /></div>
               <div><div className="text-sm font-medium">{q.label}</div><div className="text-xs text-muted-foreground">{q.note}</div></div>
             </button>

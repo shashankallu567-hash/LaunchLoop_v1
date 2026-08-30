@@ -14,7 +14,7 @@ export default function Leaderboard() {
     api.get(`/leaderboard?scope=${scope}`).then((r) => setItems(r.data)).finally(() => setLoading(false));
   }, [scope]);
 
-  const rankColor = (r) => (r === 1 ? "#D3FF24" : r === 2 ? "#A1A1AA" : r === 3 ? "#F5A623" : "#71717A");
+  const rankColor = (r) => (r === 1 ? "var(--pos)" : r === 2 ? "hsl(var(--muted-foreground))" : r === 3 ? "var(--warning)" : "hsl(var(--muted-foreground))");
 
   return (
     <div className="space-y-8">
@@ -26,7 +26,7 @@ export default function Leaderboard() {
         <div className="flex gap-1 p-1 rounded-lg bg-surface" data-testid="leaderboard-scope">
           {["global", "mine"].map((s) => (
             <button key={s} onClick={() => setScope(s)} data-testid={`scope-${s}`}
-              className={`px-4 py-2 text-sm rounded-md transition-colors capitalize ${scope === s ? "bg-white text-black font-semibold" : "text-muted-foreground hover:text-white"}`}>
+              className={`px-4 py-2 text-sm rounded-md transition-colors capitalize ${scope === s ? "bg-foreground text-background font-semibold" : "text-muted-foreground hover:text-foreground"}`}>
               {s === "mine" ? "My Campaigns" : "Global"}
             </button>
           ))}
@@ -34,15 +34,15 @@ export default function Leaderboard() {
       </div>
 
       {loading ? (
-        <div className="space-y-2">{[...Array(6)].map((_, i) => <div key={i} className="h-16 rounded-lg border border-white/10 bg-panel animate-pulse" />)}</div>
+        <div className="space-y-2">{[...Array(6)].map((_, i) => <div key={i} className="h-16 rounded-lg border border-border bg-panel animate-pulse" />)}</div>
       ) : items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/15 bg-panel p-12 text-center">
-          <Trophy className="mx-auto text-white/30" size={30} />
+        <div className="rounded-xl border border-dashed border-border bg-panel p-12 text-center">
+          <Trophy className="mx-auto text-foreground/30" size={30} />
           <p className="text-sm text-muted-foreground mt-3">No campaigns here yet.</p>
         </div>
       ) : (
-        <div className="rounded-xl border border-white/10 bg-panel overflow-hidden">
-          <div className="grid grid-cols-12 gap-3 px-5 py-3 border-b border-white/10 text-[11px] uppercase tracking-wide text-muted-foreground">
+        <div className="rounded-xl border border-border bg-panel overflow-hidden">
+          <div className="grid grid-cols-12 gap-3 px-5 py-3 border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
             <div className="col-span-1">#</div>
             <div className="col-span-5">Campaign</div>
             <div className="col-span-2 hidden md:block">Channel</div>
@@ -52,7 +52,7 @@ export default function Leaderboard() {
           {items.map((e, i) => (
             <motion.div key={e.id || i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.03, 0.4) }}
               data-testid={`leaderboard-row-${e.rank}`}
-              className={`grid grid-cols-12 gap-3 px-5 py-4 items-center border-b border-white/5 transition-colors ${e.mine ? "bg-growth/5" : "hover:bg-surface/50"}`}>
+              className={`grid grid-cols-12 gap-3 px-5 py-4 items-center border-b border-border transition-colors ${e.mine ? "bg-growth/5" : "hover:bg-surface/50"}`}>
               <div className="col-span-1 font-mono-metric font-bold flex items-center gap-1" style={{ color: rankColor(e.rank) }}>
                 {e.rank <= 3 && <Crown size={13} />}{e.rank}
               </div>
@@ -66,7 +66,7 @@ export default function Leaderboard() {
               </div>
               <div className="col-span-2 hidden md:block text-sm text-muted-foreground">{e.channel}</div>
               <div className="col-span-2 text-right font-mono-metric text-sm"><CountUp value={e.impressions || 0} /></div>
-              <div className="col-span-2 text-right font-mono-metric font-bold" style={{ color: e.score >= 80 ? "#D3FF24" : e.score >= 65 ? "#0066FF" : "#A1A1AA" }}>{e.score}</div>
+              <div className="col-span-2 text-right font-mono-metric font-bold" style={{ color: e.score >= 80 ? "var(--pos)" : e.score >= 65 ? "var(--info)" : "hsl(var(--muted-foreground))" }}>{e.score}</div>
             </motion.div>
           ))}
         </div>

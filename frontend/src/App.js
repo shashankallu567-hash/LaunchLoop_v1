@@ -17,8 +17,8 @@ import Report from "@/pages/Report";
 
 function Loader() {
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-      <div className="h-8 w-8 rounded-full border-2 border-white/10 border-t-growth animate-spin" />
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="h-8 w-8 rounded-full border-2 border-border border-t-growth animate-spin" />
     </div>
   );
 }
@@ -55,7 +55,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <AppRoutes />
-          <Toaster position="bottom-right" theme="dark" richColors />
+          <Toaster position="bottom-right" richColors />
         </BrowserRouter>
       </AuthProvider>
     </div>

@@ -5,6 +5,7 @@ import {
   BarChart3, LogOut, Sparkles, Menu, X,
 } from "lucide-react";
 import { useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true, testid: "nav-dashboard" },
@@ -38,16 +39,20 @@ export default function Layout({ children }) {
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive ? "bg-surface text-white border border-white/10" : "text-muted-foreground hover:text-white hover:bg-surface/60"
+                isActive ? "bg-surface text-foreground border border-border" : "text-muted-foreground hover:text-foreground hover:bg-surface/60"
               }`}>
             <n.icon size={18} />{n.label}
           </NavLink>
         ))}
       </nav>
 
-      <div className="p-3 border-t border-white/10">
+      <div className="p-3 border-t border-border space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] uppercase tracking-widest text-muted-foreground">Theme</span>
+          <ThemeToggle />
+        </div>
         <button onClick={() => navigate("/app/launch")} data-testid="sidebar-new-launch"
-          className="w-full mb-3 flex items-center justify-center gap-2 bg-growth text-black font-semibold text-sm py-2.5 rounded-lg transition-transform hover:scale-[0.98] active:scale-95">
+          className="w-full flex items-center justify-center gap-2 bg-growth text-black font-semibold text-sm py-2.5 rounded-lg transition-transform hover:scale-[0.98] active:scale-95">
           <Rocket size={16} /> New Launch
         </button>
         <div className="flex items-center justify-between px-2">
@@ -65,26 +70,29 @@ export default function Layout({ children }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex">
+    <div className="min-h-screen bg-background text-foreground flex">
       {/* desktop sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-white/10 bg-panel fixed inset-y-0 left-0 z-30">
+      <aside className="hidden lg:flex w-64 flex-col border-r border-border bg-panel fixed inset-y-0 left-0 z-30">
         <SidebarContent />
       </aside>
 
       {/* mobile top bar */}
-      <div className="lg:hidden fixed top-0 inset-x-0 z-40 glass border-b border-white/10 flex items-center justify-between px-4 h-14">
+      <div className="lg:hidden fixed top-0 inset-x-0 z-40 glass border-b border-border flex items-center justify-between px-4 h-14">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-md bg-growth flex items-center justify-center"><Sparkles size={16} className="text-black" /></div>
           <span className="font-heading font-extrabold tracking-tight">LaunchLoop<span className="text-growth">.</span></span>
         </div>
-        <button onClick={() => setOpen(true)} data-testid="mobile-menu-btn" className="p-2"><Menu size={22} /></button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button onClick={() => setOpen(true)} data-testid="mobile-menu-btn" className="p-2"><Menu size={22} /></button>
+        </div>
       </div>
 
       {/* mobile drawer */}
       {open && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/70" onClick={() => setOpen(false)} />
-          <aside className="relative w-72 bg-panel border-r border-white/10 flex flex-col">
+          <aside className="relative w-72 bg-panel border-r border-border flex flex-col">
             <button onClick={() => setOpen(false)} className="absolute top-4 right-4 p-1 text-muted-foreground"><X size={20} /></button>
             <SidebarContent />
           </aside>

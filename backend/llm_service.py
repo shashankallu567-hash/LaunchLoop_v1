@@ -121,3 +121,141 @@ Return JSON exactly like:
     if not cleaned:
         raise ValueError("Empty angles from LLM")
     return cleaned
+
+
+# ============================================================
+# Deep Analysis (AI second opinion) + Angle Rewrite
+# ============================================================
+FACTOR_LABELS = {
+    "hook": "Hook Strength", "emotion": "Emotional Trigger",
+    "audience_fit": "Audience Fit", "shareability": "Shareability",
+    "platform_fit": "Platform Fit",
+}
+FACTOR_KEYS = ["hook", "emotion", "audience_fit", "shareability", "platform_fit"]
+
+
+async def _gemini_json(system: str, prompt: str, session: str) -> dict:
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    chat = LlmChat(api_key=EMERGENT_LLM_KEY, session_id=session, system_message=system).with_model(
+        "gemini", "gemini-3-flash-preview")
+    resp = await chat.send_message(UserMessage(text=prompt))
+    text = (resp if isinstance(resp, str) else str(resp)).strip()
+    if text.startswith("```"):
+        text = text.split("```", 2)[1]
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip("` \n")
+    return json.loads(text)
+
+
+def _clamp(v):
+    try:
+        return max(0, min(100, int(round(float(v)))))
+    except Exception:
+        return 50
+
+
+async def deep_analysis(headline, body, audience, goal, platform, heuristic) -> dict:
+    """AI second-opinion score. Falls back to a deterministic estimate near the heuristic."""
+    weights = heuristic.get("weights", {})
+    if EMERGENT_LLM_KEY:
+        try:
+            system = ("You are a brutally honest senior growth strategist giving a second-opinion "
+                      "virality assessment. Return ONLY valid JSON, no markdown.")
+            prompt = f"""Independently judge this launch angle for virality. Do NOT just agree with anyone.
+
+Headline: {headline}
+Body: {body}
+Goal: {goal}
+Platform: {platform}
+Audience: {json.dumps(audience, ensure_ascii=False)}
+
+Score each factor 0-100: hook, emotion, audience_fit, shareability, platform_fit.
+Then give an overall 0-100 and 2-3 concise reasons (each under 20 words).
+
+Return JSON exactly:
+{{"overall": 0, "factors": {{"hook":0,"emotion":0,"audience_fit":0,"shareability":0,"platform_fit":0}}, "reasons": ["..."]}}"""
+            data = await _gemini_json(system, prompt, f"deep-{hashlib.md5(headline.encode()).hexdigest()[:8]}")
+            factors = {k: _clamp(data.get("factors", {}).get(k, 50)) for k in FACTOR_KEYS}
+            overall = _clamp(data.get("overall", sum(factors[k] * weights.get(k, 0.2) for k in FACTOR_KEYS)))
+            reasons = [str(r).strip() for r in (data.get("reasons") or [])][:3] or ["AI assessment complete."]
+            return {"overall": overall, "factors": factors, "reasons": reasons, "source": "ai"}
+        except Exception as e:  # noqa
+            logger.warning(f"deep_analysis LLM failed, fallback: {e}")
+
+    # deterministic fallback — a plausible independent opinion near the heuristic
+    factors = {}
+    for k in FACTOR_KEYS:
+        base = heuristic.get("factors", {}).get(k, {}).get("score", 50)
+        offset = int((_h01(headline + k) - 0.5) * 24)  # ±12
+        factors[k] = _clamp(base + offset)
+    overall = _clamp(sum(factors[k] * weights.get(k, 0.2) for k in FACTOR_KEYS))
+    strong = max(factors, key=factors.get)
+    weak = min(factors, key=factors.get)
+    reasons = [
+        f"Strongest signal is {FACTOR_LABELS[strong]} — it carries the angle.",
+        f"{FACTOR_LABELS[weak]} is the biggest risk and drags virality down.",
+    ]
+    return {"overall": overall, "factors": factors, "reasons": reasons, "source": "fallback"}
+
+
+def _h01(seed: str) -> float:
+    return int(hashlib.sha256(seed.encode()).hexdigest()[:8], 16) / 0xFFFFFFFF
+
+
+async def rewrite_angle(headline, body, weak_factor, audience, goal, platform) -> dict:
+    """Rewrite ONLY to improve the selected weak factor, preserving product/audience/goal/platform."""
+    if EMERGENT_LLM_KEY:
+        try:
+            system = ("You are an elite launch copywriter. Rewrite a launch angle to specifically improve "
+                      "ONE named weakness while preserving product, audience, goal and platform. "
+                      "Return ONLY valid JSON, no markdown.")
+            prompt = f"""Rewrite this launch angle to specifically improve its {FACTOR_LABELS.get(weak_factor, weak_factor)}.
+
+Original headline: {headline}
+Original body: {body}
+Goal: {goal}
+Platform: {platform}
+Audience: {json.dumps(audience, ensure_ascii=False)}
+
+Keep the same product, audience, goal and platform. Improve ONLY {FACTOR_LABELS.get(weak_factor, weak_factor)}.
+Headline max 12 words.
+
+Return JSON exactly:
+{{"headline":"...","body":"...","what_changed":"one sentence on what you changed"}}"""
+            data = await _gemini_json(system, prompt, f"rw-{hashlib.md5((headline+weak_factor).encode()).hexdigest()[:8]}")
+            return {"headline": str(data.get("headline", headline)).strip(),
+                    "body": str(data.get("body", body)).strip(),
+                    "what_changed": str(data.get("what_changed", "Refined the copy.")).strip(),
+                    "source": "ai"}
+        except Exception as e:  # noqa
+            logger.warning(f"rewrite LLM failed, fallback: {e}")
+
+    return _fallback_rewrite(headline, body, weak_factor, audience, platform)
+
+
+def _fallback_rewrite(headline, body, weak_factor, audience, platform):
+    aud = audience or {}
+    name = aud.get("name", "Founders")
+    pain = (aud.get("pain_points") or ["wasting time"])[0]
+    desire = (aud.get("desires") or ["move faster"])[0]
+    hl = headline.strip().rstrip(".")
+    if weak_factor == "audience_fit":
+        new_hl = f"{name}: stop {pain}"
+        changed = f"Added a specific audience identity ({name}) and their pain point ({pain})."
+    elif weak_factor == "hook":
+        new_hl = f"How we fixed {pain} in 3 steps"
+        changed = "Added a curiosity 'How' opener and a concrete number to sharpen the hook."
+    elif weak_factor == "emotion":
+        new_hl = f"You're not failing — {hl.lower()} is the honest fix"
+        changed = "Spoke directly to 'you' and added an honest, emotional framing."
+    elif weak_factor == "shareability":
+        new_hl = f"How to {desire} — the free playbook"
+        changed = "Framed it as a save-worthy 'how' guide with a free hook to drive shares."
+    else:  # platform_fit
+        cue = {"Twitter/X": "a thread", "LinkedIn": "the lessons", "Product Hunt": "launching today",
+               "Email": "inside", "Reddit": "an honest story"}.get(platform, "the breakdown")
+        new_hl = f"{hl} — {cue}"
+        changed = f"Added a {platform or 'platform'}-native cue to fit where it's posted."
+    new_body = f"{name} who want to {desire}: {body.strip()}"
+    return {"headline": new_hl[:90], "body": new_body, "what_changed": changed, "source": "fallback"}

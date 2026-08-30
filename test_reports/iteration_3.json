@@ -1,0 +1,45 @@
+{
+  "summary": "Iteration-3 focused retest of the two follow-up fixes + smoke regression on LaunchLoop AI. BACKEND: new /app/backend/tests/test_deep_analysis_guard.py — 9/9 PASSED. POST /api/deep-analysis returns 200 with a valid 5-factor recomputed heuristic + ai + comparison for 7 malformed 'heuristic' bodies ({'bad':'data'}, {}, {'factors':{}}, 1-factor, string, null, int); a valid heuristic from /api/score is preserved unchanged (overall identical); unauthenticated call returns 403/401; no _id leakage. FRONTEND (live Gemini, demo login): ANGLE REWRITE DOWNGRADE HANDLING VERIFIED BOTH BRANCHES. Downgrade (hook 76 -> overall 61->58, and shareability retries 61->60 x3): rewrite-downgrade-warning shown once with '(61 -> 58)' copy, keep-improved-btn relabels to 'Use New Version' and loses bg-growth, keep-original-btn becomes the lime (bg-growth) primary — PASS. Improvement (shareability 30, 4th attempt, overall 61->63): NO warning, keep-improved-btn stays 'Keep Improved' with bg-growth, keep-original-btn secondary — PASS. Headings: strong factor -> 'HOOK STRENGTH IS ALREADY STRONG AT 76 — REWRITING MAY NOT LIFT IT', weak -> 'WHY EMOTIONAL TRIGGER IS AT 40' (both correct; my first assertion was a case-sensitivity false negative, CSS uppercases). Apply regression: Keep Improved / Use New Version updates the selected angle card headline + ViralityScore panel (61->52 and 61->63 observed) with correct toast ('Applied new version (lower score)' vs 'Improved angle applied'); Keep Original clears the result panel; Try Again re-runs and produces a fresh rewrite. ANALYTICS LIGHT THEME: 6 charts render, predicted bar fill is now #9AA295 (was near-invisible) on white panel — visible but still only ~2.6:1 contrast, and the 'predicted' LEGEND TEXT is still rendered in the series colour #9AA295 (recharts overrides Legend wrapperStyle colour per item), so the legend label fix did not actually take effect. Dark theme unchanged (#3a444f / #B7FF00). SMOKE: demo login -> dashboard -> full wizard -> Gemini generation -> Deep Analysis -> Run Launch -> Experiment Detail (prediction vs reality MATCHED, real metrics save, resynth, learning note) -> Share report page; leaderboard scope global 14 / mine 4; theme persists across refresh (light stays light, dark stays dark, ll_theme correct). ZERO console errors on every page tested.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Analytics (light theme) — Predicted vs Actual Impressions",
+        "issues": [
+          "The 'predicted' legend TEXT is still #9AA295 on white (~2.6:1 at 12px, below WCAG 4.5:1). Recharts paints .recharts-legend-item-text with the series colour inline, so Legend wrapperStyle={{color:c.axis}} has no effect (verified: computed colour of the wrapper is #59616B but the item text is rgb(154,162,149)). Fix with a Legend formatter, e.g. formatter={(v)=> <span style={{color:c.axis}}>{v}</span>}.",
+          "predicted bar fill #9AA295 on a white panel is ~2.6:1, just under the 3:1 guideline for meaningful graphical objects. A slightly darker light-mode barMuted (~#6F7A6B) would be safer.",
+          "Dark theme (pre-existing, unchanged): the 'predicted' legend text is #3a444f on the dark panel — effectively unreadable; same Legend formatter fix would help."
+        ]
+      },
+      {
+        "screen": "Angle Rewrite — downgrade state",
+        "issues": [
+          "Button DOM/visual order is unchanged on downgrade: the recommended lime primary 'Keep Original' still sits to the RIGHT of the secondary 'Use New Version'. Styling is correct, but placing the primary first would match the recommendation and keyboard/tab order."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_deep_analysis_guard.py",
+    "/app/test_reports/pytest/guard_results.xml"
+  ],
+  "action_items": [
+    "Analytics.jsx: use a Recharts Legend formatter to colour legend label text (wrapperStyle colour is overridden per item) and consider darkening light-mode barMuted to ~#6F7A6B.",
+    "Optional polish: in AngleRewrite.jsx render the primary action first on downgrade (Keep Original before Use New Version)."
+  ],
+  "critical_code_review_comments": [
+    "AngleRewrite.jsx: the why-weak heading threshold is 65 while the chip colour scale treats >=75 as strong and <55 as weak — a factor at 65-74 shows 'is already strong at N' but is coloured mid. Consider aligning the heading threshold with the 75/55 bands.",
+    "AngleRewrite.jsx keepImproved(): fine as-is (uses >= for the up-branch), matching the warning condition, so warning and button styling can never disagree.",
+    "deep_analysis_ep guard is correct and cheap: `len(heuristic.get('factors', {})) != 5` also covers non-dict/None via the isinstance check — validated with 7 malformed payloads."
+  ],
+  "updated_files": ["/app/backend/tests/test_deep_analysis_guard.py"],
+  "success_rate": { "backend": "100% (9/9 guard tests)", "frontend": "100% of targeted flows (2 minor light/dark legend contrast nits, no functional failures)" },
+  "seed_data_creation": "Created several demo-user campaigns via the wizard (product 'LoopMetrics' and 'SmokeTest Co'); one experiment 325ca166-1183-4eeb-96d7-081c9ae68a5d has real metrics + resynth applied.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "demo@launchloop.ai / demo1234 (data-testid demo-login-btn); POST /api/auth/demo returns access_token (NOT 'token' — note for future test scripts)",
+  "context_for_next_testing_agent": "Auth token key in API responses is 'access_token'. Rewrite downgrade is easy to reproduce: on the first generated angle for LoopMetrics, chip scores were hook 76 / emotion 40 / audience_fit 80 / shareability 30 / platform_fit 77 and rewriting hook or emotion lowered the overall; shareability needed ~4 Try Again attempts to get an up-score. Both branches now verified. Only remaining open item is the Recharts legend text colour on Analytics (light + dark).",
+  "rca_of_the_issue": "Analytics legend contrast: Recharts renders each legend label with an inline `color` equal to the series fill, which wins over the Legend wrapperStyle colour, so the intended #59616B axis colour is never applied to the 'predicted' label — it inherits the pale #9AA295 bar colour."
+}
