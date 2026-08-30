@@ -7,6 +7,7 @@ import DeepAnalysis from "@/components/DeepAnalysis";
 import PredictionReality from "@/components/PredictionReality";
 import { Sparkles, Link2, Download, Rocket, Brain, Dna } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import TeamWatermark from "@/components/TeamWatermark";
 
 export default function Report() {
   const { id } = useParams();
@@ -37,6 +38,7 @@ export default function Report() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <TeamWatermark />
       {/* action bar */}
       <div className="no-print glass border-b border-border sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
@@ -53,7 +55,7 @@ export default function Report() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-5 md:px-8 py-10 space-y-8" data-testid="report-content">
+      <div className="max-w-4xl mx-auto px-5 md:px-8 py-10 space-y-8 relative z-10" data-testid="report-content">
         {/* header */}
         <div className="grain rounded-2xl border border-border bg-panel p-8">
           <div className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Launch report</div>

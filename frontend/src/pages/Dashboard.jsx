@@ -89,7 +89,7 @@ export default function Dashboard() {
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* recent experiments */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-heading text-lg font-bold flex items-center gap-2"><FlaskConical size={18} /> Recent experiments</h2>
             <button onClick={() => navigate("/app/experiments")} className="text-xs text-muted-foreground hover:text-foreground transition-colors" data-testid="view-all-experiments">View all</button>

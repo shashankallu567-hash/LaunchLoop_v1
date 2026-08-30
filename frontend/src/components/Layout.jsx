@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
+import TeamWatermark from "@/components/TeamWatermark";
 
 const NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true, testid: "nav-dashboard" },
@@ -71,6 +72,7 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
+      <TeamWatermark sidebarOffset />
       {/* desktop sidebar */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-border bg-panel fixed inset-y-0 left-0 z-30">
         <SidebarContent />
@@ -99,7 +101,7 @@ export default function Layout({ children }) {
         </div>
       )}
 
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-w-0">
+      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-w-0 relative z-10">
         <div className="max-w-6xl mx-auto px-5 md:px-8 py-8">{children}</div>
       </main>
     </div>

@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend-only iteration focused on the new TAS INNOVATORS TeamWatermark. Verified via Playwright (1440/768/390) after demo login (demo-login-btn): watermark element data-testid='team-watermark' present on Dashboard, Create Launch, Audience DNA, Experiments, Experiment Detail, Leaderboard, Analytics and the public /report/:id. On every page computed styles were position:fixed, z-index:0, pointer-events:none, overflow:hidden, inner opacity 0.10 (dark) / 0.07 (light), sidebarOffset applied on desktop (left=256px, width=1184px) and left=0 on tablet/mobile. Behind-content proven two ways: elementFromPoint at viewport centre returns the opaque card ('rounded-xl border border-border bg-panel'), not the watermark; and a 25-element text sample on the public Report shows 0 elements topped by the watermark. Interactivity verified with NORMAL clicks (no force): nav-leaderboard, sidebar-new-launch, view/report action bar (copy-link-btn, download-report-btn), leaderboard scope-global/scope-mine, factor-toggle-hook (aria-expanded=true), wizard step-next, and text entry in input-product-name/input-product-desc. Modals/drawers render above it: Audience DNA drawer (new-audience-btn) is a fixed z-50 layer and the mobile drawer opens and its nav navigates (scoped '.z-50 [data-testid=nav-analytics]' -> /app/analytics). ThemeToggle light/dark/system all switch correctly and persist to ll_theme, with watermark opacity dropping to 0.07 in light mode. ZERO console errors across every page and flow. Overflow: NO horizontal overflow on Report at 1440/768/390, and none on Dashboard at 1440/768; a 203px horizontal overflow exists on Dashboard @390px, but it is NOT caused by the watermark (scrollWidth stayed 593 with the watermark display:none) - it is a pre-existing Dashboard grid/truncate layout bug.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Dashboard (recent experiments column)", "issue": "Horizontal overflow at 390px: document.scrollWidth=593 vs clientWidth=390 (203px). Deepest offenders are the 'font-medium truncate' / 'text-sm truncate' headline divs (width 391px, right=428) inside recent-campaign-<id> and the 'View all' button (right=593). Cause: the grid item <div className='lg:col-span-2'> (Dashboard.jsx:92) has default min-width:auto, so the nowrap 'truncate' text inside recent-campaign buttons blows up the auto grid track's min-content. NOT watermark-related (verified by hiding the watermark). Suggested fix: add min-w-0 (and/or overflow-hidden) to the lg:col-span-2 wrapper at Dashboard.jsx:92.", "selector": "[data-testid^='recent-campaign-'], [data-testid='view-all-experiments']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Create Launch / Audience step (dark, desktop)", "issues": ["On short pages with large empty space below the cards the 10% gold 'TAS INNOVATORS' mark is clearly visible in the blank area. It obscures nothing (verified) and reads as intentional branding, but if a subtler look is wanted, drop dark opacity to ~0.06."]},
+      {"screen": "Watermark accessibility/text", "issues": ["The watermark literal 'TAS INNOVATORS' is the first text in document.body.innerText on every authenticated page. aria-hidden=true + select-none are correctly set so it is hidden from AT; noted only because text-scraping tests/snapshots will now see it."]}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/iteration_5.json"],
+  "action_items": [
+    "Fix Dashboard @390px horizontal overflow: add min-w-0 to the 'lg:col-span-2' wrapper in /app/frontend/src/pages/Dashboard.jsx line 92 (pre-existing, unrelated to the watermark)."
+  ],
+  "critical_code_review_comments": [
+    "TeamWatermark.jsx is correct: fixed inset-0 z-0 pointer-events-none overflow-hidden aria-hidden, clamp() sizing, theme-aware opacity, sidebarOffset via lg:left-64 — no layout contribution and no click interception, confirmed at runtime.",
+    "Layer stack is consistent: watermark z-0 < main z-10 < sidebar z-30 < mobile bar z-40 < drawers/modals z-50; report action bar z-40. No conflicts observed.",
+    "When LOGO_SRC is swapped in, keep the img at w-[min(70vw,720px)] and the parent overflow-hidden so a large PNG cannot create overflow; re-test only the overflow assertions after the swap.",
+    "Duplicate nav data-testids exist (desktop sidebar + mobile drawer render the same testids simultaneously), which makes strict-mode Playwright selectors ambiguous. Consider suffixing drawer testids (e.g. nav-analytics-mobile)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested (skipped per request)", "frontend": "97% (all watermark requirements pass; 1 pre-existing responsive bug)"},
+  "seed_data_creation": "None persisted. Typed 'TEST WM Smoke' into the Create Launch wizard but never submitted; no campaigns/audiences created.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "demo@launchloop.ai / demo1234 (demo-login-btn)",
+  "context_for_next_testing_agent": "Watermark fully validated: presence/z-0/pointer-events-none/opacity per theme on all 8 surfaces, behind-content hit tests, modal & drawer layering, no overflow on Report at all 3 breakpoints, zero console errors. Only open frontend item is the pre-existing Dashboard @390px 203px horizontal overflow (Dashboard.jsx:92 needs min-w-0). Backend skipped this round (66/66 from iteration 4). Report id used for /report testing: 1c079f7b-35dd-42a3-a516-aa40a0219386. Note the transient Cloudflare 502 at start — services had just restarted; retry after ~30s.",
+  "rca_of_the_issue": "Dashboard mobile overflow RCA: <div class='lg:col-span-2'> is a grid item of 'grid lg:grid-cols-3'. At <lg the grid is a single auto track; because the item keeps min-width:auto, its min-content contribution includes the white-space:nowrap 'truncate' headline text inside each recent-campaign button (391px), forcing the track to 573px and the document to 593px on a 390px viewport. Reproduce: login as demo at 390x844, open /app, evaluate document.documentElement.scrollWidth. Verified independent of the watermark (scrollWidth unchanged with the watermark set to display:none). Mitigation: min-w-0 on the grid item."
+}
