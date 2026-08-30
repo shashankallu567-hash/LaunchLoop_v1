@@ -98,7 +98,7 @@ Return JSON exactly like:
 
     chat = LlmChat(
         api_key=EMERGENT_LLM_KEY,
-        session_id=f"launchloop-{hashlib.md5(product_name.encode()).hexdigest()[:8]}",
+        session_id=f"launchloop-{hashlib.sha256(product_name.encode()).hexdigest()[:8]}",
         system_message=system,
     ).with_model("gemini", "gemini-3-flash-preview")
 
@@ -175,7 +175,7 @@ Then give an overall 0-100 and 2-3 concise reasons (each under 20 words).
 
 Return JSON exactly:
 {{"overall": 0, "factors": {{"hook":0,"emotion":0,"audience_fit":0,"shareability":0,"platform_fit":0}}, "reasons": ["..."]}}"""
-            data = await _gemini_json(system, prompt, f"deep-{hashlib.md5(headline.encode()).hexdigest()[:8]}")
+            data = await _gemini_json(system, prompt, f"deep-{hashlib.sha256(headline.encode()).hexdigest()[:8]}")
             factors = {k: _clamp(data.get("factors", {}).get(k, 50)) for k in FACTOR_KEYS}
             overall = _clamp(data.get("overall", sum(factors[k] * weights.get(k, 0.2) for k in FACTOR_KEYS)))
             reasons = [str(r).strip() for r in (data.get("reasons") or [])][:3] or ["AI assessment complete."]
@@ -223,7 +223,7 @@ Headline max 12 words.
 
 Return JSON exactly:
 {{"headline":"...","body":"...","what_changed":"one sentence on what you changed"}}"""
-            data = await _gemini_json(system, prompt, f"rw-{hashlib.md5((headline+weak_factor).encode()).hexdigest()[:8]}")
+            data = await _gemini_json(system, prompt, f"rw-{hashlib.sha256((headline+weak_factor).encode()).hexdigest()[:8]}")
             return {"headline": str(data.get("headline", headline)).strip(),
                     "body": str(data.get("body", body)).strip(),
                     "what_changed": str(data.get("what_changed", "Refined the copy.")).strip(),

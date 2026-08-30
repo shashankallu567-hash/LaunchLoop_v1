@@ -171,12 +171,11 @@ def _build_comparison(heuristic, ai):
         agreement = (f"Both methods land within a few points on {', '.join(d['label'] for d in close[:2])}."
                      if close else "The two methods take noticeably different views across the board.")
     biggest = max(factor_diffs, key=lambda d: abs(d["diff"]))
+    difference = "AI and the heuristic are closely aligned on every factor."
     if biggest["diff"] < 0:
         difference = f"AI is less confident in {biggest['label']} (heuristic {biggest['heuristic']} vs AI {biggest['ai']}) — the message may be too broad."
     elif biggest["diff"] > 0:
         difference = f"AI rates {biggest['label']} higher than the heuristic (heuristic {biggest['heuristic']} vs AI {biggest['ai']})."
-    else:
-        difference = "AI and the heuristic are closely aligned on every factor."
     return {"overall_diff": ai["overall"] - heuristic["overall"], "agreement": agreement,
             "difference": difference, "factor_diffs": factor_diffs}
 

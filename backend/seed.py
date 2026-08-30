@@ -1,14 +1,16 @@
 """Idempotent seeding: demo user, audience profiles, sample campaigns, leaderboard."""
+import os
 import logging
 from datetime import datetime, timezone, timedelta
-from auth import hash_password
+from auth import hash_password, verify_password
 from models import new_id, now_iso
 import virality
 
 logger = logging.getLogger(__name__)
 
-DEMO_EMAIL = "demo@launchloop.ai"
-DEMO_PASSWORD = "demo1234"
+# Demo account credentials (public by design; overridable via env for non-demo deployments).
+DEMO_EMAIL = os.environ.get("DEMO_EMAIL", "demo@launchloop.ai")
+DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "demo1234")
 
 LEADERBOARD_SEED = [
     ("Notion AI Autopilot", "How we automated 80% of our docs — and the results shocked us", "Twitter/X", 92),
@@ -24,7 +26,7 @@ LEADERBOARD_SEED = [
 ]
 
 
-async def seed_all(db):
+async def seed_all(db) -> None:
     try:
         await db.users.create_index("email", unique=True)
         await db.users.create_index("id", unique=True)
@@ -45,6 +47,10 @@ async def seed_all(db):
         logger.info("Seeded demo user")
     else:
         user_id = user["id"]
+        # idempotently refresh the demo password hash if the env value changed
+        if not verify_password(DEMO_PASSWORD, user["password_hash"]):
+            await db.users.update_one({"id": user_id}, {"$set": {"password_hash": hash_password(DEMO_PASSWORD)}})
+            logger.info("Refreshed demo user password hash")
 
     if await db.audience_profiles.count_documents({"user_id": user_id}) == 0:
         profiles = [

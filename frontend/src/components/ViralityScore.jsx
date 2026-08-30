@@ -89,7 +89,7 @@ export default function ViralityScore({ score, compact = false, defaultOpen = fa
                 <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }} className="mt-1.5 space-y-0.5 overflow-hidden">
                   {f.reasons.map((r, j) => (
-                    <li key={j} className="text-xs text-muted-foreground flex gap-1.5">
+                    <li key={`${f.key}-${j}`} className="text-xs text-muted-foreground flex gap-1.5">
                       <span className="text-foreground/30 mt-px">›</span>{r}
                     </li>
                   ))}
