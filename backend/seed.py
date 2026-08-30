@@ -52,8 +52,7 @@ async def seed_all(db) -> None:
             await db.users.update_one({"id": user_id}, {"$set": {"password_hash": hash_password(DEMO_PASSWORD)}})
             logger.info("Refreshed demo user password hash")
 
-    if await db.audience_profiles.count_documents({"user_id": user_id}) == 0:
-        profiles = [
+    profiles = [
             {
                 "id": new_id(), "user_id": user_id,
                 "name": "Indie SaaS Founders",
@@ -85,11 +84,15 @@ async def seed_all(db) -> None:
                 "created_at": now_iso(), "updated_at": now_iso(),
             },
         ]
-        await db.audience_profiles.insert_many([dict(p) for p in profiles])
-        first_audience = {k: v for k, v in profiles[0].items()}
-        logger.info("Seeded audience profiles")
-    else:
-        first_audience = await db.audience_profiles.find_one({"user_id": user_id}, {"_id": 0})
+    # Self-healing: insert any seeded demo profile that is missing (by name),
+    # so demo data cannot silently degrade if a profile is deleted.
+    for p in profiles:
+        if not await db.audience_profiles.find_one({"user_id": user_id, "name": p["name"]}):
+            await db.audience_profiles.insert_one(dict(p))
+            logger.info(f"Seeded audience profile: {p['name']}")
+    first_audience = await db.audience_profiles.find_one(
+        {"user_id": user_id, "name": "Indie SaaS Founders"}, {"_id": 0}
+    ) or await db.audience_profiles.find_one({"user_id": user_id}, {"_id": 0})
 
     if await db.campaigns.count_documents({"user_id": user_id}) == 0:
         samples = [

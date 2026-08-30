@@ -145,4 +145,5 @@
 @media print {
   .no-print { display: none !important; }
   body { background: #fff !important; }
+  [data-testid='report-content'] > * { break-inside: avoid; }
 }

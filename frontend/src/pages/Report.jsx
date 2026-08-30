@@ -21,8 +21,26 @@ export default function Report() {
   }, [id]);
 
   const copyLink = async () => {
-    try { await navigator.clipboard.writeText(window.location.href); toast.success("Share link copied"); }
-    catch { toast.error("Copy failed — select the URL manually"); }
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Share link copied");
+    } catch {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast.success("Share link copied");
+      } catch {
+        toast.error("Copy failed — select the URL manually");
+      }
+    }
   };
   const download = () => window.print();
 
