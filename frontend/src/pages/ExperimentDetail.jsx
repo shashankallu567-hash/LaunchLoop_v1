@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "@/lib/api";
@@ -39,12 +39,12 @@ export default function ExperimentDetail() {
   const [form, setForm] = useState({ impressions: 0, engagement: 0, shares: 0, conversions: 0 });
   const [busy, setBusy] = useState(false);
 
-  const load = () => api.get(`/campaigns/${id}`).then((r) => {
+  const load = useCallback(() => api.get(`/campaigns/${id}`).then((r) => {
     setC(r.data);
     setForm(r.data.outcome || { impressions: 0, engagement: 0, shares: 0, conversions: 0 });
-  }).catch(() => toast.error("Not found")).finally(() => setLoading(false));
+  }).catch(() => toast.error("Not found")).finally(() => setLoading(false)), [id]);
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => { load(); }, [load]);
 
   const resynth = async () => {
     setBusy(true);

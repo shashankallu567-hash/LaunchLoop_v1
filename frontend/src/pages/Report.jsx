@@ -41,7 +41,7 @@ export default function Report() {
       <TeamWatermark />
       {/* action bar */}
       <div className="no-print glass border-b border-border sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-5 md:px-8 min-h-16 py-2 flex flex-wrap items-center justify-between gap-2">
           <button onClick={() => navigate("/")} className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-growth flex items-center justify-center"><Sparkles size={18} className="text-black" /></div>
             <span className="font-heading font-extrabold tracking-tight">LaunchLoop<span className="text-growth">.</span></span>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import VoiceButton from "@/components/VoiceButton";
 import {
   Dna, Plus, Pencil, Trash2, Rocket, Sparkles, X, Heart, AlertTriangle, Star, Zap, Share2, Users,
 } from "lucide-react";
@@ -141,7 +142,14 @@ export default function AudienceDNA() {
             </div>
             <div className="space-y-4">
               <Field label="Name"><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} data-testid="audience-name" className="ll-input" placeholder="Indie SaaS Founders" /></Field>
-              <Field label="Description"><textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} data-testid="audience-desc" className="ll-input resize-none" /></Field>
+              <Field label="Description">
+                <div className="relative">
+                  <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} data-testid="audience-desc" className="ll-input resize-none pr-12" />
+                  <div className="absolute right-2 top-2">
+                    <VoiceButton value={form.description} onChange={(v) => setForm({ ...form, description: v })} testid="voice-audience-desc" label="audience description" />
+                  </div>
+                </div>
+              </Field>
               <Field label="Demographics"><input value={form.demographics} onChange={(e) => setForm({ ...form, demographics: e.target.value })} className="ll-input" placeholder="25-40, technical, US/EU" /></Field>
               {[
                 ["motivations", "Motivations"], ["pain_points", "Pain Points"], ["interests", "Interests"],

@@ -1,0 +1,34 @@
+{
+  "summary": "Frontend-only iteration 6 testing (backend skipped per request). Verified all 4 new items: (1) VoiceButton on Create Launch product description (voice-product-desc) and Audience DNA description (voice-audience-desc) — renders, clicking does not crash, does not block typing, controlled value preserved, second click toggles cleanly; SpeechRecognition WAS available in the test Chromium so the listening toggle path was exercised (no crash, no runaway toasts). (2) How to use page — nav-help (desktop sidebar + mobile drawer) routes to /app/help, renders 8 workflow steps + all 9 concept cards, help-start-launch and help-cta both navigate to /app/launch. (3) demo-badge 'Demo · synthetic data' present on Dashboard for demo user. (4) ZERO console errors/warnings observed across Dashboard, Create Launch, Audience DNA, Experiment Detail, Analytics, Leaderboard, How to use and Report (ExperimentDetail exhaustive-deps warning gone). Full regression smoke passed: demo login -> wizard (product/audience/goal/platforms) -> Gemini generation (9 angle elements, 'Angles generated with Gemini' toast) -> angle select -> expandable virality factors -> Deep Analysis (heuristic 59 vs AI 38 with agreement/difference) -> Angle Rewrite (5 factor chips, why-weak, rewrite-result, keep-improved applied) -> Run Launch -> Experiment Detail (Prediction vs Reality grid, save real metrics persisted + rendered, learning note) -> Share Report (score, factor explanations, prediction/reality). Leaderboard scope toggle works (global 18 rows / mine 8). Analytics renders all 6 widgets. Theme toggle light/dark persists in ll_theme across refresh (html class updated). TAS INNOVATORS watermark present with pointer-events:none (non-blocking). No horizontal overflow on Dashboard @1440/768/390 or Report @1440/768/390 or Help @390. Audience DNA create + edit + delete verified (delete is a native window.confirm).",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Report header @390px", "issues": ["Header action row is clipped/overflows vertically: copy-link-btn and download-report-btn have bounding y=-4 (partly above the header) and report-new-experiment wraps to a second row that sits outside the header's background band, overlapping page content. All three remain clickable, so it is cosmetic only. Suggest allowing the header to grow (h-auto + py) or collapsing the actions into an icon-only row at <420px."]},
+      {"screen": "Create Launch step 1", "issues": ["Product Name input still uses focus:ring-white/50 while the description textarea uses focus:ring-ring — inconsistent focus ring token (and white ring is barely visible in light theme)."]},
+      {"screen": "Audience DNA delete", "issues": ["Uses native window.confirm('Delete this audience profile?') instead of the shadcn AlertDialog used elsewhere — inconsistent with the rest of the UI and untestable without dialog handlers."]}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/iteration_6.json"],
+  "action_items": [
+    "COPY/LOGIC (medium): Learning note wording contradicts the metric deltas. On the run I did, impressions were PRED 17,629 vs REAL 1,000 (-94.3%) yet the note read 'This launch OVERPERFORMED — reality beat prediction by 94% on impressions'. The overall badge (OVERPERFORMED +174.1%) came from the other metrics. The generator appears to use abs() of the impressions delta and/or attributes the aggregate verdict to impressions. Use the signed impressions delta and the metric that actually drove the verdict.",
+    "MINOR: Fix Report header wrap/clipping at 390px (see design_issues).",
+    "MINOR: Align Create Launch product-name focus ring to focus:ring-ring.",
+    "MINOR (optional): replace window.confirm on audience delete with the shadcn dialog."
+  ],
+  "critical_code_review_comments": [
+    "VoiceButton: when the engine IS available and listening, rec.onresult rebuilds the value from baseRef + full transcript on every result — any characters the user types while listening are silently overwritten on the next result event. Consider disabling the field or re-basing baseRef on the current value in onresult.",
+    "VoiceButton: baseRef is captured at start() from the value prop, so a stale closure value is used if the parent value changes during dictation (same root cause as above).",
+    "Layout.jsx: nav data-testids are duplicated between the desktop sidebar and the mobile drawer (both render SidebarContent). Selectors must be scoped ('aside [data-testid=...]' vs 'aside.relative [data-testid=...]'); consider suffixing the drawer testids.",
+    "Landing page has no 'demo-login-btn' testid (it is header-demo / hero-demo; demo-login-btn only exists on /login). Request description was inaccurate — worth aligning testid names."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "not tested (skipped per request)", "frontend": "100% of new features; ~97% overall (1 copy/logic defect in learning note, 3 cosmetic nits)" },
+  "seed_data_creation": "Created 2 campaigns via the wizard (NoteLaunch, NoteLaunch2) using the demo account; real metrics saved on both. Created and then deleted a TEST_QA audience profile (cleaned up, 0 remaining).",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "demo@launchloop.ai / demo1234 via hero-demo button on landing (or demo-login-btn on /login)",
+  "context_for_next_testing_agent": "Frontend flows are all green. Use hero-demo on the landing page for instant demo login. Wizard platform step pre-selects Twitter/X — do NOT click the platform chip or you deselect it and step-next stays disabled. Experiment-detail real metric inputs must be scoped as '[data-testid=\"real-metrics-form\"] input' because the wrapper div also matches [data-testid^=\"real-\"]. Audience delete triggers window.confirm — register page.on('dialog', accept). Gemini generation takes ~10-20s; Deep Analysis ~15s; Rewrite ~10s.",
+  "rca_of_the_issue": "Learning-note defect: the note text is generated from prediction-vs-reality deltas but uses the magnitude (not the sign) of the impressions delta and pairs it with the aggregate verdict, producing 'reality beat prediction by 94% on impressions' when impressions were actually -94.3%. Report-header clipping: the report top bar is a fixed-height flex row; at 390px the 3 action buttons + theme toggle exceed the width, wrap, and the fixed height clips/pushes the second row outside the header band."
+}

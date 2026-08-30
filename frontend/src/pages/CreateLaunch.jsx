@@ -9,6 +9,7 @@ import AngleRewrite from "@/components/AngleRewrite";
 import {
   ArrowRight, ArrowLeft, Check, Rocket, Dna, Target, Share2, Sparkles, Loader2, Plus,
 } from "lucide-react";
+import VoiceButton from "@/components/VoiceButton";
 
 const GOALS = [
   { id: "awareness", label: "Awareness & Reach", note: "Get seen by as many of the right people as possible" },
@@ -141,13 +142,18 @@ export default function CreateLaunch() {
               <div>
                 <label className="text-xs uppercase tracking-wide text-muted-foreground">Product name</label>
                 <input value={form.product_name} onChange={(e) => setForm({ ...form, product_name: e.target.value })} data-testid="input-product-name"
-                  placeholder="e.g. TaskFlow" className="mt-1.5 w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50" />
+                  placeholder="e.g. TaskFlow" className="mt-1.5 w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
               <div>
                 <label className="text-xs uppercase tracking-wide text-muted-foreground">What does it do?</label>
-                <textarea value={form.product_description} onChange={(e) => setForm({ ...form, product_description: e.target.value })} data-testid="input-product-desc"
-                  rows={4} placeholder="AI task manager that plans your day automatically…"
-                  className="mt-1.5 w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 resize-none" />
+                <div className="relative mt-1.5">
+                  <textarea value={form.product_description} onChange={(e) => setForm({ ...form, product_description: e.target.value })} data-testid="input-product-desc"
+                    rows={4} placeholder="AI task manager that plans your day automatically…"
+                    className="w-full bg-surface border border-border rounded-lg px-3 py-2.5 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+                  <div className="absolute right-2 top-2">
+                    <VoiceButton value={form.product_description} onChange={(v) => setForm({ ...form, product_description: v })} testid="voice-product-desc" label="product description" />
+                  </div>
+                </div>
               </div>
             </div>
           )}

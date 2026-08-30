@@ -49,7 +49,12 @@ export default function Dashboard() {
           <h1 className="font-heading text-2xl md:text-3xl font-extrabold tracking-tight">
             Welcome back, {user?.name?.split(" ")[0]}
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">Every launch, smarter than the last.</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-muted-foreground text-sm">Every launch, smarter than the last.</p>
+            {user?.is_demo && (
+              <span data-testid="demo-badge" className="text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded-full bg-growth/15 text-growth border border-growth/30">Demo · synthetic data</span>
+            )}
+          </div>
         </div>
         <button onClick={() => navigate("/app/launch")} data-testid="dashboard-new-launch"
           className="flex items-center gap-2 bg-growth text-black font-semibold px-5 py-2.5 rounded-lg transition-transform hover:scale-[0.98] active:scale-95">

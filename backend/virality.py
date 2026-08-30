@@ -259,6 +259,7 @@ def compute_delta(prediction: Dict[str, int], outcome: Dict[str, int]) -> Dict[s
 
 def learning_note(delta: Dict[str, Any], score: Dict[str, Any]) -> str:
     verdict = delta["_summary"]["verdict"]
+    avg_pct = delta["_summary"]["avg_pct"]
     imp_pct = delta["impressions"]["pct"]
     shares_pct = delta["shares"]["pct"]
     conv_pct = delta["conversions"]["pct"]
@@ -266,11 +267,19 @@ def learning_note(delta: Dict[str, Any], score: Dict[str, Any]) -> str:
     strongest = max(score["factors"].items(), key=lambda kv: kv[1]["score"])
 
     if verdict == "OVERPERFORMED":
-        head = f"This launch OVERPERFORMED — reality beat prediction by {abs(imp_pct):.0f}% on impressions."
+        head = f"Overall this launch OVERPERFORMED — averaging {avg_pct:+.0f}% versus prediction across metrics."
     elif verdict == "UNDERPERFORMED":
-        head = f"This launch UNDERPERFORMED — impressions came in {abs(imp_pct):.0f}% under prediction."
+        head = f"Overall this launch UNDERPERFORMED — averaging {avg_pct:+.0f}% versus prediction across metrics."
     else:
-        head = f"This launch MATCHED the prediction closely ({imp_pct:+.0f}% on impressions) — well calibrated."
+        head = f"Overall this launch MATCHED the prediction — averaging {avg_pct:+.0f}% across metrics."
+
+    # impressions described with the correct sign
+    if imp_pct >= 5:
+        imp_note = f" Impressions beat the forecast by {imp_pct:.0f}%."
+    elif imp_pct <= -5:
+        imp_note = f" Impressions fell short of the forecast by {abs(imp_pct):.0f}%."
+    else:
+        imp_note = f" Impressions tracked the forecast closely ({imp_pct:+.0f}%)."
 
     if shares_pct >= 20:
         mid = " Shares outperformed, so the shareability angle landed."
@@ -284,4 +293,4 @@ def learning_note(delta: Dict[str, Any], score: Dict[str, Any]) -> str:
     tip = (f" Next run: double down on your strongest factor ({strongest[1]['label']}, "
            f"{strongest[1]['score']}) and fix the weakest ({weakest[1]['label']}, "
            f"{weakest[1]['score']}).")
-    return head + mid + tip
+    return head + imp_note + mid + tip

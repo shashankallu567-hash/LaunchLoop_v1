@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard, Rocket, Dna, FlaskConical, Trophy,
-  BarChart3, LogOut, Sparkles, Menu, X,
+  BarChart3, LogOut, Sparkles, Menu, X, HelpCircle,
 } from "lucide-react";
 import { useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -15,6 +15,7 @@ const NAV = [
   { to: "/app/experiments", label: "Experiments", icon: FlaskConical, testid: "nav-experiments" },
   { to: "/app/leaderboard", label: "Leaderboard", icon: Trophy, testid: "nav-leaderboard" },
   { to: "/app/analytics", label: "Analytics", icon: BarChart3, testid: "nav-analytics" },
+  { to: "/app/help", label: "How to use", icon: HelpCircle, testid: "nav-help" },
 ];
 
 export default function Layout({ children }) {

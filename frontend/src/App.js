@@ -13,6 +13,7 @@ import Experiments from "@/pages/Experiments";
 import ExperimentDetail from "@/pages/ExperimentDetail";
 import Leaderboard from "@/pages/Leaderboard";
 import Analytics from "@/pages/Analytics";
+import HowToUse from "@/pages/HowToUse";
 import Report from "@/pages/Report";
 
 function Loader() {
@@ -44,6 +45,7 @@ function AppRoutes() {
       <Route path="/app/experiments/:id" element={<Protected><ExperimentDetail /></Protected>} />
       <Route path="/app/leaderboard" element={<Protected><Leaderboard /></Protected>} />
       <Route path="/app/analytics" element={<Protected><Analytics /></Protected>} />
+      <Route path="/app/help" element={<Protected><HowToUse /></Protected>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
