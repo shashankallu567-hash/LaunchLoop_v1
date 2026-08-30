@@ -1,0 +1,118 @@
+{
+  "theme_strategy": {
+    "mode": "dark",
+    "emotional_archetype": "The Performance Pro / High-Contrast Swiss",
+    "vibe": "Elite precision, analytical, trustworthy but modern. Deep dark backgrounds with high-visibility kinetic triggers for data (think Vercel/Linear dashboards). No generic SaaS blue or purple.",
+    "general_rules": "Avoid generic 'Bootstrap' symmetry. Prioritize extreme data legibility with dense, grid-based layouts. Never use complete transparent backgrounds for overlays."
+  },
+  "typography": {
+    "rules": "DO NOT use Inter, Roboto, or Space Grotesk. Establish tension through contrasting geometric and monospace typefaces.",
+    "fonts": {
+      "headings": {
+        "family": "Manrope",
+        "weights": ["400", "700", "800"],
+        "usage": "Use tight letter-spacing (tracking-tight) for large headers to ensure a sharp, dense look.",
+        "fallback": "sans-serif"
+      },
+      "body": {
+        "family": "IBM Plex Sans",
+        "weights": ["400", "500"],
+        "usage": "Crisp and highly legible for long form text and dense tables.",
+        "fallback": "sans-serif"
+      },
+      "metrics_and_scores": {
+        "family": "JetBrains Mono",
+        "weights": ["500", "700"],
+        "usage": "Use strictly for the Virality Score numbers, deltas (Prediction vs Reality), and data labels.",
+        "fallback": "monospace"
+      }
+    },
+    "hierarchy_caps": {
+      "h1": "text-4xl md:text-5xl lg:text-6xl tracking-tighter",
+      "h2": "text-2xl md:text-3xl tracking-tight",
+      "h3": "text-xl md:text-2xl",
+      "body": "text-sm md:text-base leading-relaxed"
+    }
+  },
+  "colors": {
+    "backgrounds": {
+      "app": "#050505",
+      "panel": "#0A0A0C",
+      "surface_hover": "#141417"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A1A1AA",
+      "muted": "#71717A"
+    },
+    "accents": {
+      "primary_action": "#FFFFFF",
+      "primary_action_text": "#000000",
+      "growth_positive": "#D3FF24",
+      "decline_negative": "#FF3366",
+      "metric_neutral": "#0066FF"
+    },
+    "borders": {
+      "default": "rgba(255, 255, 255, 0.1)",
+      "focus": "rgba(211, 255, 36, 0.5)"
+    },
+    "rules": "Zero full-screen gradients. Tint grays slightly cool. Hover state text must always be explicitly set. Avoid Teal Green (#1B93A4) and Purple (#7351B7)."
+  },
+  "visual_enhancers": {
+    "surfaces": "Use 'Grid Borders' (The Technical Look) for the Analytics Dashboard. 1px solid strokes (border-white/10). No soft muddy shadows.",
+    "glassmorphism": "For sticky headers or floating overlays: bg-black/60 with backdrop-blur-2xl and a 1px top border of border-white/10.",
+    "textures": "Incorporate subtle CSS noise/grain on the Launch Twin generation backdrop to reduce digital flatness.",
+    "chart_styles": "Use sharp line charts and crisp bar charts (Recharts). Remove default grid lines; keep only horizontal reference lines at 10% opacity."
+  },
+  "grids_layouts": {
+    "strategy": "High Density Grid (Mode B) for the Dashboard and Analytics.",
+    "spacing_scale": "Use generous padding inside containers (p-6, p-8) to prevent text collision with borders. Use gap-4 or gap-6 for metric bento boxes.",
+    "bento_spans": "Summary metrics (col-span-1), Main Chart (col-span-2 row-span-2), Feed/History (col-span-1 row-span-2)."
+  },
+  "component_instructions": {
+    "buttons": "Pill-shaped or slightly rounded (rounded-md). High contrast (bg-white text-black for primary). Must include hover:scale-[0.98] and active:scale-95 micro-animations.",
+    "cards": "Flat background, max 8px border-radius. 1px subtle border (border-white/10). Hover effect should slightly lift or highlight the border (hover:border-white/20).",
+    "virality_score_display": "Do not just use a circle. Use horizontal layered bars or 'segmented chips' for hook, clarity, emotion, and shareability. Add text reasoning beside each factor.",
+    "prediction_vs_reality": "Display as a split-pane or side-by-side metric box. Use JetBrains Mono for the delta. Highlight positive delta in Acid Yellow (#D3FF24).",
+    "forms_inputs": "Shadcn based. Dark background, 1px border. Focus ring should be high contrast (focus:ring-2 focus:ring-white/50)."
+  },
+  "motion": {
+    "rules": "No 'transition: all'. Use specific transitions (e.g., transition-colors, transition-transform).",
+    "interactions": "Buttons/cards scale down slightly on click. Rows in the Leaderboard or Campaign History should stagger in using framer-motion.",
+    "data_reveal": "Use count-up animations for the Virality Score and prediction deltas.",
+    "reduced_motion": "Wrap heavy animations in a check for prefers-reduced-motion."
+  },
+  "media_images": {
+    "rules": "No placeholder images. Use provided realistic imagery for demo users or atmospheric backgrounds.",
+    "assets": {
+      "user_avatar": {
+        "url": "https://images.pexels.com/photos/27015641/pexels-photo-27015641.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Professional avatar for Audience DNA profiles / User account."
+      },
+      "abstract_tech_texture": {
+        "url": "https://images.pexels.com/photos/18337643/pexels-photo-18337643.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Neon/Geometric abstract texture. Can be used at low opacity (10-15%) for empty states or the background of the Shareable Report."
+      }
+    }
+  },
+  "accessibility": {
+    "contrast": "Ensure APCA/WCAG AA compliance. Use text-shadow on text overlapping any textured backgrounds.",
+    "testing_attributes": "All interactive elements (buttons, nav links, score chips, run campaign button) MUST have a `data-testid` attribute (e.g., `data-testid=\"run-campaign-button\"`).",
+    "focus": "All interactive elements must have visible focus states with higher contrast than the default state."
+  },
+  "libraries": {
+    "icons": "lucide-react (default for Shadcn) or @phosphor-icons/react for duotone tech feel.",
+    "charts": "recharts (wrapped in Shadcn Chart components).",
+    "animation": "framer-motion (for layout shifts, staggering list items, and number tickers).",
+    "notifications": "sonner (standardize for prediction updates, campaign run success)."
+  },
+  "universal_guidelines_for_main_agent": [
+    "You tend to converge toward generic outputs. Break the 'AI slop' aesthetic by ensuring strict geometric alignment, sharp contrasts, and omitting unnecessary gradients.",
+    "Never apply `transition: all` in CSS. Always target specific properties like `opacity` or `transform`.",
+    "Do not center-align the app container (`.App { text-align: center; }`). Left-align dense data for readability.",
+    "Always use the provided actual image URLs. Never use generic placeholder services.",
+    "Prioritize using existing UI components in `/src/components/ui/` before building custom raw HTML inputs.",
+    "For the Virality Score, ensure the formula explanation is visually prominent, not hidden behind tooltips. Show the math.",
+    "Data-testid attributes are MANDATORY on all clickable or state-changing elements for reliable testing."
+  ]
+}

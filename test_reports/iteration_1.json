@@ -1,0 +1,41 @@
+{
+  "summary": "First full test of LaunchLoop AI. Backend: created pytest suite (/app/backend/tests/backend_test.py, 29 tests) covering health, auth (demo/register/login/me/401s/bcrypt format), audience CRUD + refresh, generate (4 angles, 5 factors, cache), campaign loop (prediction/synthetic outcome/delta/verdict/learning, real-outcome override, resynth, delete, 404s), public report, leaderboard (global 10 seeds + mine, rank ordering), analytics (totals/trends/factor_avg/empty state) and cross-user isolation — 29/29 passing. Frontend: Playwright e2e over landing→demo login→dashboard, all 6 nav tabs, leaderboard scope toggle (13 global vs 3 mine), analytics (6 recharts charts + best angle/platform cards), full 5-step Create Launch wizard with Gemini generation (4 angle cards with compact bars), angle select → Run Launch → experiment detail (4-stage loop, explainable ViralityScore with per-factor reasons, verdict badge, real-metrics form saved & verdict flipped UNDERPERFORMED→OVERPERFORMED, resynth changed outcome, learning note), share report (public without token, copy-link/download buttons present), signup of a brand-new account with correct empty states, Audience DNA create/AI-suggest/edit/delete, experiment delete, logout. No blocking frontend or backend defects found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/audiences/refresh", "issue": "Accepts a raw `dict` body instead of a Pydantic model — no input validation (any JSON shape accepted)."},
+      {"endpoint": "POST /api/score", "issue": "Raw `dict` body, no Pydantic validation; missing headline/body silently scored as empty strings."},
+      {"endpoint": "PUT /api/audiences/{id}", "issue": "Full-replace semantics via AudienceProfileCreate — omitted fields are reset to defaults (works for the UI which always sends full form, but a PATCH-style partial update would be safer)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Experiments.jsx", "issue": "Invalid HTML: delete <button data-testid=\"delete-exp-*\"> is nested inside the card <button data-testid=\"experiment-*\">, producing a React 'cannot be a descendant of <button>' hydration console error on every Experiments page load. Functionality still works (stopPropagation), but should be refactored to a div/role=button card.", "selector": "[data-testid^=\"experiment-\"] > [data-testid^=\"delete-exp-\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "All /app pages (Dashboard, Audience DNA, Experiments)", "issues": ["Sonner toasts render top-right and overlap the top-right primary CTA ('Create Launch' / 'New Audience' header button) — button text is clipped while a toast is visible. Offset the toaster or move it to bottom-right."]},
+      {"screen": "Report page (anonymous visitor)", "issues": ["'New experiment' button sends logged-out viewers to /login with no context; consider labeling it 'Try LaunchLoop' for public visitors."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Refactor Experiments.jsx card so the delete button is not nested inside another <button> (removes hydration console error).",
+    "Offset the sonner Toaster so it does not overlap top-right header CTAs.",
+    "Optional: add Pydantic request models for /api/audiences/refresh and /api/score."
+  ],
+  "critical_code_review_comments": [
+    "server.py mixes routing + all business logic (330 lines, acceptable now) but /audiences/refresh and /score take untyped dicts — add Pydantic models for consistency with the rest of the API.",
+    "auth.py _extract_token also accepts a cookie named access_token although the app only issues Bearer tokens; harmless but dead path.",
+    "All Mongo reads correctly project out _id and password_hash; verified no _id leaks in any response (auth/me, campaigns, audiences, report, leaderboard, outcome/resynth).",
+    "Cross-user data isolation verified: another user gets 404 on demo campaigns and an empty audience list."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (29/29 pytest)", "frontend": "100% of tested flows (1 cosmetic HTML nesting warning, 1 toast overlap)"},
+  "seed_data_creation": "Test-only data: transient registered users (qa_*/test_*@example.com), one 'QA TestBot' campaign (deleted), one 'QA Audience' profile (deleted). Backend pytest fixtures clean up their own TEST_ campaigns/audiences. Registered throwaway users remain in the users collection.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "demo@launchloop.ai / demo1234 (or POST /api/auth/demo)",
+  "context_for_next_testing_agent": "Backend regression suite is at /app/backend/tests/backend_test.py (run: cd /app/backend && python -m pytest tests/backend_test.py -v). Note /api/generate returns source='ai' (not 'llm'). Gemini is live and returns 4 angles in ~5-10s; second identical payload returns cached=true. Frontend testids to reuse: hero-demo, demo-login-btn, nav-* , input-product-name/desc, audience-select-<id>, goal-<id>, platform-<name>, step-next, angle-<id>, run-launch-btn, enter-real-btn, real-<metric>, save-real-btn, resynth-btn, pvr-verdict, pvr-<metric>, learning-note, open-report-btn, copy-link-btn, download-report-btn, scope-global/scope-mine, leaderboard-row-<rank>, experiment-<id>, delete-exp-<id>, edit-audience-<id>, delete-audience-<id>. CountUp animates numbers, so screenshots taken <1.5s after load show partially-counted scores (not a bug).",
+  "rca_of_the_issue": "No functional defect requiring RCA. The only console error is a React DOM-nesting warning caused by button-in-button markup in Experiments.jsx (line ~56 card button wrapping the line ~75 delete button)."
+}

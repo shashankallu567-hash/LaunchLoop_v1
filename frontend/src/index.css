@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 2%;
+    --foreground: 0 0% 100%;
+    --card: 240 6% 4%;
+    --card-foreground: 0 0% 100%;
+    --popover: 240 6% 4%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 240 5% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 5% 10%;
+    --muted-foreground: 240 5% 55%;
+    --accent: 240 5% 10%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 347 100% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 5% 14%;
+    --input: 240 5% 14%;
+    --ring: 74 100% 57%;
+    --chart-1: 74 100% 57%;
+    --chart-2: 217 100% 50%;
+    --chart-3: 347 100% 60%;
+    --chart-4: 40 96% 60%;
+    --chart-5: 0 0% 70%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { color-scheme: dark; }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-color: #050505;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, .font-heading { font-family: 'Manrope', sans-serif; }
+  ::selection { background: #D3FF24; color: #000; }
+}
+
+@layer utilities {
+  .font-mono-metric { font-family: 'JetBrains Mono', monospace; }
+  .grain {
+    position: relative;
+  }
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .glass {
+    background: rgba(5, 5, 6, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar-thumb { background: #1f1f22; border-radius: 6px; border: 2px solid #050505; }
+::-webkit-scrollbar-thumb:hover { background: #2d2d31; }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff !important; }
+}
